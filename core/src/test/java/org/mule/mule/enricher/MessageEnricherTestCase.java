@@ -15,7 +15,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mule.api.config.MuleProperties.MULE_PASS_COPY_TO_ENRICHER_EXCEPTION_HANDLING;
@@ -38,6 +37,7 @@ import org.mule.api.transport.ReplyToHandler;
 import org.mule.config.DefaultMuleConfiguration;
 import org.mule.config.i18n.CoreMessages;
 import org.mule.construct.Flow;
+import org.mule.context.notification.MessageProcessorNotification;
 import org.mule.enricher.MessageEnricher;
 import org.mule.enricher.MessageEnricher.EnrichExpressionPair;
 import org.mule.processor.chain.DefaultMessageProcessorChain;
@@ -56,7 +56,7 @@ import org.junit.Test;
 
 import junit.framework.Assert;
 
-public class MessageEnricherTestCase extends AbstractMuleContextTestCase
+public class MessageEnricherTestCase extends AbstractEnricherTestCase
 {
 
     public static final String FOO_FLOW_VAR_EXPRESSION = "#[flowVars['foo']]";
@@ -570,73 +570,5 @@ public class MessageEnricherTestCase extends AbstractMuleContextTestCase
             assertThat(e.getMessage(), is("Expected."));
         }
         assertThat(RequestContext.getEvent().getReplyToHandler(), instanceOf(ReplyToHandler.class));
-    }
-
-
-    private MuleEvent createNonBlockingEvent(SensingNullReplyToHandler nullReplyToHandler)
-    {
-        Flow flow = mock(Flow.class);
-        when(flow.getProcessorPath(any(MessageProcessor.class))).thenReturn("testPath" + "");
-        when(flow.getProcessingStrategy()).thenReturn(new NonBlockingProcessingStrategy());
-
-        return new DefaultMuleEvent(new DefaultMuleMessage(TEST_MESSAGE, muleContext),
-                                                  MessageExchangePattern.REQUEST_RESPONSE, nullReplyToHandler,
-                                                  flow);
-    }
-
-    private MuleEvent createBlockingEvent()
-    {
-        return createNonBlockingEvent(null);
-    }
-
-    private MessageEnricher createEnricher(SensingNullMessageProcessor sensingNullMessageProcessor)
-    {
-        MessageEnricher enricher = new MessageEnricher();
-        enricher.setMuleContext(muleContext);
-        enricher.addEnrichExpressionPair(new EnrichExpressionPair("#[sessionVars['foo']]"));
-        enricher.setEnrichmentMessageProcessor(sensingNullMessageProcessor);
-        return enricher;
-    }
-
-    private MuleEvent processEnricherInChain(MessageEnricher enricher, final MuleEvent in) throws MuleException
-    {
-        return DefaultMessageProcessorChain.from(enricher, new MessageProcessor()
-        {
-            @Override
-            public MuleEvent process(MuleEvent event) throws MuleException
-            {
-                // Ensure that message is writable after being processed by enricher with non-blocking target
-                ((ThreadSafeAccess) event).assertAccess(true);
-                assertThat(event.getMessage(), is(sameInstance(in.getMessage())));
-                return event;
-            }
-        }).process(in);
-    }
-
-    private void doEnrichDataTypePropagationTest(EnrichExpressionPair pair) throws Exception
-    {
-        final DataType<?> dataType = DataTypeFactory.create(String.class, JSON);
-        dataType.setEncoding(StandardCharsets.UTF_16.name());
-
-        MessageEnricher enricher = new MessageEnricher();
-        enricher.setMuleContext(muleContext);
-
-        enricher.addEnrichExpressionPair(pair);
-        enricher.setEnrichmentMessageProcessor(new MessageProcessor()
-        {
-            @Override
-            public MuleEvent process(MuleEvent event) throws MuleException
-            {
-
-                event.getMessage().setPayload("bar", dataType);
-                return event;
-            }
-        });
-        MuleEvent in = getTestEvent("");
-
-        MuleEvent out = enricher.process(in);
-
-        assertEquals("bar", out.getMessage().getInvocationProperty("foo"));
-        assertThat(out.getMessage().getPropertyDataType("foo", PropertyScope.INVOCATION), DataTypeMatcher.like(String.class, JSON, StandardCharsets.UTF_16.name()));
     }
 }
