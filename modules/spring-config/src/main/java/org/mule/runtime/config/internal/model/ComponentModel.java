@@ -53,6 +53,7 @@ import org.mule.runtime.api.component.TypedComponentIdentifier;
 import org.mule.runtime.api.component.TypedComponentIdentifier.ComponentType;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.exception.MuleRuntimeException;
+import org.mule.runtime.api.meta.model.ExtensionModel;
 import org.mule.runtime.api.meta.NamedObject;
 import org.mule.runtime.api.meta.model.config.ConfigurationModel;
 import org.mule.runtime.api.meta.model.connection.ConnectionProviderModel;
@@ -140,6 +141,13 @@ public class ComponentModel implements ComponentAst {
   private ComponentMetadataAst componentMetadata;
 
   private Class<?> type;
+  private boolean enabled = true;
+  private ExtensionModel extensionModel;
+
+
+  public ExtensionModel getExtensionModel() {
+    return extensionModel;
+  }
 
   private final ClassTypeLoader typeLoader = ExtensionsTypeLoaderFactory.getDefault().createTypeLoader();
 
@@ -495,31 +503,31 @@ public class ComponentModel implements ComponentAst {
 
       @Override
       public void onConfiguration(ConfigurationModel model) {
-        setConfigurationModel(model);
+        setConfigurationModel(extensionModel, model);
         onParameterizedModel(model);
       }
 
       @Override
       public void onConnectionProvider(ConnectionProviderModel model) {
-        setConnectionProviderModel(model);
+        setConnectionProviderModel(extensionModel,model);
         onParameterizedModel(model);
       }
 
       @Override
       public void onOperation(OperationModel model) {
-        setComponentModel(model);
+        setComponentModel(extensionModel,model);
         onParameterizedModel(model);
       }
 
       @Override
       public void onSource(SourceModel model) {
-        setComponentModel(model);
+        setComponentModel(extensionModel, model);
         onParameterizedModel(model);
       }
 
       @Override
       public void onConstruct(ConstructModel model) {
-        setComponentModel(model);
+        setComponentModel(extensionModel, model);
         onParameterizedModel(model);
       }
 
@@ -1008,11 +1016,13 @@ public class ComponentModel implements ComponentAst {
     });
   }
 
-  public void setComponentModel(org.mule.runtime.api.meta.model.ComponentModel model) {
+  public void setComponentModel(ExtensionModel extensionModel, org.mule.runtime.api.meta.model.ComponentModel model) {
+    this.extensionModel = extensionModel;
     this.componentModel = model;
   }
 
-  public void setNestableElementModel(NestableElementModel nestableElementModel) {
+  public void setConfigurationModel(ExtensionModel extensionModel, ConfigurationModel model) {
+    this.extensionModel = extensionModel;
     this.nestableElementModel = nestableElementModel;
   }
 
@@ -1020,7 +1030,8 @@ public class ComponentModel implements ComponentAst {
     this.configurationModel = model;
   }
 
-  public void setConnectionProviderModel(ConnectionProviderModel connectionProviderModel) {
+  public void setConnectionProviderModel(ExtensionModel extensionModel, ConnectionProviderModel connectionProviderModel) {
+    this.extensionModel = extensionModel;
     this.connectionProviderModel = connectionProviderModel;
   }
 
