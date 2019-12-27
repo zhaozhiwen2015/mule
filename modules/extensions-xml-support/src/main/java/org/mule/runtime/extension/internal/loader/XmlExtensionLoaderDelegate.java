@@ -536,7 +536,7 @@ public final class XmlExtensionLoaderDelegate {
                                  ExtensionModelHelper extensionModelHelper) {
     // TODO MULE-17419 (AST) Set all models, not just for operations (routers/scopes are missing here for sure)
     moduleModel.recursiveStream().forEach(comp -> result.getOperationModel(comp.getIdentifier().getName())
-        .ifPresent(model -> ((ComponentModel) comp).setComponentModel(model)));
+        .ifPresent(model -> ((ComponentModel) comp).setComponentModel(result, model)));
 
     final ComponentLocationVisitor clv = new ComponentLocationVisitor();
     recursiveStreamWithHierarchy(moduleModel).forEach(clv);
@@ -555,7 +555,6 @@ public final class XmlExtensionLoaderDelegate {
         .fromVendor(vendor)
         .onVersion(version)
         .withCategory(Category.valueOf(category.toUpperCase()))
-        .withXmlDsl(xmlDslModel);
   }
 
   /**

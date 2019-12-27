@@ -333,7 +333,7 @@ public class MacroExpansionModuleModel {
     processorChainBuilder.addCustomAttribute(ORIGINAL_IDENTIFIER, operationRefModel.getIdentifier());
 
     ComponentModel processorChainModel = processorChainBuilder.build();
-    processorChainModel.setComponentModel(operationModel);
+    processorChainModel.setComponentModel(extensionModel, operationModel);
     processorChainModel.setComponentType(operationRefModel.getComponentType());
 
     return processorChainModel;
