@@ -554,7 +554,7 @@ public final class XmlExtensionLoaderDelegate {
         .describedAs(description)
         .fromVendor(vendor)
         .onVersion(version)
-        .withCategory(Category.valueOf(category.toUpperCase()))
+        .withCategory(Category.valueOf(category.toUpperCase()));
   }
 
   /**
