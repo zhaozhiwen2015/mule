@@ -141,9 +141,7 @@ public class ComponentModel implements ComponentAst {
   private ComponentMetadataAst componentMetadata;
 
   private Class<?> type;
-  private boolean enabled = true;
   private ExtensionModel extensionModel;
-
 
   public ExtensionModel getExtensionModel() {
     return extensionModel;
@@ -502,37 +500,37 @@ public class ComponentModel implements ComponentAst {
     extensionModelHelper.walkToComponent(getIdentifier(), new ExtensionWalkerModelDelegate() {
 
       @Override
-      public void onConfiguration(ConfigurationModel model) {
+      public void onConfiguration(ExtensionModel extensionModel, ConfigurationModel model) {
         setConfigurationModel(extensionModel, model);
         onParameterizedModel(model);
       }
 
       @Override
-      public void onConnectionProvider(ConnectionProviderModel model) {
+      public void onConnectionProvider(ExtensionModel extensionModel, ConnectionProviderModel model) {
         setConnectionProviderModel(extensionModel, model);
         onParameterizedModel(model);
       }
 
       @Override
-      public void onOperation(OperationModel model) {
+      public void onOperation(ExtensionModel extensionModel, OperationModel model) {
         setComponentModel(extensionModel, model);
         onParameterizedModel(model);
       }
 
       @Override
-      public void onSource(SourceModel model) {
+      public void onSource(ExtensionModel extensionModel, SourceModel model) {
         setComponentModel(extensionModel, model);
         onParameterizedModel(model);
       }
 
       @Override
-      public void onConstruct(ConstructModel model) {
+      public void onConstruct(ExtensionModel extensionModel, ConstructModel model) {
         setComponentModel(extensionModel, model);
         onParameterizedModel(model);
       }
 
       @Override
-      public void onNestableElement(NestableElementModel model) {
+      public void onNestableElement(ExtensionModel extensionModel, NestableElementModel model) {
         setNestableElementModel(extensionModel, model);
         if (model instanceof ParameterizedModel) {
           onParameterizedModel((ParameterizedModel) model);
@@ -1023,11 +1021,11 @@ public class ComponentModel implements ComponentAst {
 
   public void setNestableElementModel(ExtensionModel extensionModel, NestableElementModel model) {
     this.extensionModel = extensionModel;
-    this.nestableElementModel = nestableElementModel;
+    this.nestableElementModel = model;
   }
 
   public void setConfigurationModel(ExtensionModel extensionModel, ConfigurationModel model) {
-    this.configurationModel = configurationModel;
+    this.configurationModel = model;
     this.extensionModel = extensionModel;
 
   }

@@ -336,7 +336,7 @@ public class ExtensionModelHelper {
             @Override
             protected void onConfiguration(ConfigurationModel model) {
               if (dslSyntaxResolver.resolve(model).getElementName().equals(componentIdentifier.getName())) {
-                delegate.onConfiguration(model);
+                delegate.onConfiguration(currentExtension, model);
                 stop();
               }
             }
@@ -345,7 +345,7 @@ public class ExtensionModelHelper {
             protected void onConnectionProvider(org.mule.runtime.api.meta.model.connection.HasConnectionProviderModels owner,
                                                 ConnectionProviderModel model) {
               if (dslSyntaxResolver.resolve(model).getElementName().equals(componentIdentifier.getName())) {
-                delegate.onConnectionProvider(model);
+                delegate.onConnectionProvider(currentExtension, model);
                 stop();
               }
             }
@@ -353,7 +353,7 @@ public class ExtensionModelHelper {
             @Override
             protected void onOperation(HasOperationModels owner, OperationModel model) {
               if (dslSyntaxResolver.resolve(model).getElementName().equals(componentIdentifier.getName())) {
-                delegate.onOperation(model);
+                delegate.onOperation(currentExtension, model);
                 stop();
               }
             }
@@ -361,7 +361,7 @@ public class ExtensionModelHelper {
             @Override
             protected void onSource(HasSourceModels owner, SourceModel model) {
               if (dslSyntaxResolver.resolve(model).getElementName().equals(componentIdentifier.getName())) {
-                delegate.onSource(model);
+                delegate.onSource(currentExtension, model);
                 stop();
               }
             }
@@ -369,7 +369,7 @@ public class ExtensionModelHelper {
             @Override
             protected void onConstruct(HasConstructModels owner, ConstructModel model) {
               if (dslSyntaxResolver.resolve(model).getElementName().equals(componentIdentifier.getName())) {
-                delegate.onConstruct(model);
+                delegate.onConstruct(currentExtension, model);
                 stop();
               }
             }
@@ -377,7 +377,7 @@ public class ExtensionModelHelper {
             @Override
             protected void onNestable(ComposableModel owner, NestableElementModel model) {
               if (dslSyntaxResolver.resolve(model).getElementName().equals(componentIdentifier.getName())) {
-                delegate.onNestableElement(model);
+                delegate.onNestableElement(currentExtension, model);
                 stop();
               }
             }
@@ -458,17 +458,17 @@ public class ExtensionModelHelper {
    */
   public static interface ExtensionWalkerModelDelegate {
 
-    void onConfiguration(ConfigurationModel model);
+    void onConfiguration(ExtensionModel extensionModel, ConfigurationModel model);
 
-    void onConnectionProvider(ConnectionProviderModel model);
+    void onConnectionProvider(ExtensionModel extensionModel, ConnectionProviderModel model);
 
-    void onOperation(OperationModel model);
+    void onOperation(ExtensionModel extensionModel, OperationModel model);
 
-    void onSource(SourceModel model);
+    void onSource(ExtensionModel extensionModel, SourceModel model);
 
-    void onConstruct(ConstructModel model);
+    void onConstruct(ExtensionModel extensionModel, ConstructModel model);
 
-    void onNestableElement(NestableElementModel model);
+    void onNestableElement(ExtensionModel extensionModel, NestableElementModel model);
 
   }
 
