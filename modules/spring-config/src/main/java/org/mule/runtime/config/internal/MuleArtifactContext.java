@@ -106,6 +106,7 @@ import org.mule.runtime.extension.api.property.XmlExtensionModelProperty;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
@@ -159,7 +160,7 @@ public class MuleArtifactContext extends AbstractRefreshableConfigApplicationCon
   private final DefaultResourceLocator resourceLocator;
   private final ApplicationModel applicationModel;
   private final MuleContextWithRegistry muleContext;
-  private final ConfigResource[] artifactConfigResources;
+  protected ConfigResource[] artifactConfigResources;
   protected BeanDefinitionFactory beanDefinitionFactory;
   private final ServiceRegistry serviceRegistry = new SpiServiceRegistry();
   private final ArtifactType artifactType;
@@ -258,7 +259,7 @@ public class MuleArtifactContext extends AbstractRefreshableConfigApplicationCon
     });
   }
 
-  private ApplicationModel createApplicationModel() {
+  protected ApplicationModel createApplicationModel() {
     try {
       DefaultConfigurationPropertiesResolver propertyResolver =
           new DefaultConfigurationPropertiesResolver(empty(), new EnvironmentPropertiesConfigurationProvider());
