@@ -28,6 +28,7 @@ import org.mule.runtime.api.util.concurrent.Latch;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.runtime.core.api.processor.ReactiveProcessor;
+import org.mule.runtime.core.internal.event.EventQuickCopy;
 import org.mule.runtime.core.privileged.component.AbstractExecutableComponent;
 import org.mule.runtime.core.privileged.event.BaseEventContext;
 import org.mule.runtime.core.privileged.processor.chain.MessageProcessorChain;
@@ -67,7 +68,7 @@ public class CompositeProcessorChainRouter extends AbstractExecutableComponent i
       Latch completionLatch = new Latch();
       BaseEventContext childContext = child((BaseEventContext) event.getContext(), ofNullable(getLocation()));
       childContext.onComplete((response, throwable) -> completionLatch.countDown());
-      CoreEvent result = from(processWithChildContext(event, processorChain, childContext)).block();
+      CoreEvent result = from(MessageProcessors.process(EventQuickCopy.quickCopy(childContext, event), processorChain)).block();
       try {
         // Block until all child contexts are complete
         completionLatch.await();
