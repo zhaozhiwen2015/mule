@@ -7,4 +7,4 @@ Map pipelineParams = [ "upstreamProjects" : UPSTREAM_PROJECTS_LIST.join(','),
                        "mavenSettingsXmlId" : "mule-runtime-maven-settings-MuleSettings",
                        "mavenAdditionalArgs" : "-Djava.net.preferIPv4Stack=true" ]
 
-runtimeProjectsBuild(pipelineParams)
+runtimeBuild(pipelineParams)
