@@ -295,7 +295,6 @@ public class DefaultHttpListenerConfig extends AbstractAnnotatedObject implement
         {
             try
             {
-                stopServer();
                 workManager.dispose();
             }
             catch (Exception e)
@@ -310,6 +309,7 @@ public class DefaultHttpListenerConfig extends AbstractAnnotatedObject implement
             {
                 workManager = null;
             }
+            stopServer();
             started = false;
             logger.info("Stopped listener on " + listenerUrl());
         }
