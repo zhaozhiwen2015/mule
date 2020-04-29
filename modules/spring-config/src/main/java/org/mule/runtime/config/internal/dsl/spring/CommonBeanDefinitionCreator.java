@@ -19,6 +19,7 @@ import static org.mule.runtime.config.internal.model.ApplicationModel.ANNOTATION
 import static org.mule.runtime.config.internal.model.ApplicationModel.CUSTOM_TRANSFORMER_IDENTIFIER;
 import static org.mule.runtime.config.internal.model.ApplicationModel.MULE_PROPERTIES_IDENTIFIER;
 import static org.mule.runtime.config.internal.model.ApplicationModel.MULE_PROPERTY_IDENTIFIER;
+import static org.mule.runtime.config.internal.model.ApplicationModel.MUNIT_PREFIX;
 import static org.mule.runtime.core.privileged.execution.LocationExecutionContextProvider.maskPasswords;
 import static org.mule.runtime.deployment.model.internal.application.MuleApplicationClassLoader.resolveContextArtifactPluginClassLoaders;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
@@ -193,11 +194,17 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator {
 
     Optional<Consumer<Object>> instanceCustomizationFunctionOptional;
 
-    Map<String, Object> customProperties = getTransformerCustomProperties(componentModel);
-    if (customProperties.isEmpty()) {
-      instanceCustomizationFunctionOptional = empty();
+    if (MUNIT_PREFIX.equals(componentBuildingDefinition.getComponentIdentifier().getNamespace())) {
+      //Do this to avoid caching MUnit's created objects.
+      instanceCustomizationFunctionOptional = of(t -> {
+      });
     } else {
-      instanceCustomizationFunctionOptional = of(object -> injectSpringProperties(customProperties, object));
+      Map<String, Object> customProperties = getTransformerCustomProperties(componentModel);
+      if (customProperties.isEmpty()) {
+        instanceCustomizationFunctionOptional = empty();
+      } else {
+        instanceCustomizationFunctionOptional = of(object -> injectSpringProperties(customProperties, object));
+      }
     }
 
     return rootBeanDefinition(objectFactoryClassRepository
