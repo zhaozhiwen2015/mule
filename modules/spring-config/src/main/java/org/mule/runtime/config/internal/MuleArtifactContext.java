@@ -158,7 +158,7 @@ public class MuleArtifactContext extends AbstractRefreshableConfigApplicationCon
   private final Optional<ConfigurationProperties> parentConfigurationProperties;
   private final DefaultRegistry serviceDiscoverer;
   private final DefaultResourceLocator resourceLocator;
-  private final ApplicationModel applicationModel;
+  protected ApplicationModel applicationModel;
   private final MuleContextWithRegistry muleContext;
   protected ConfigResource[] artifactConfigResources;
   protected BeanDefinitionFactory beanDefinitionFactory;
