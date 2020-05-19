@@ -171,6 +171,9 @@ public class PollingSourceTestCase extends AbstractExtensionFunctionalTestCase {
       synchronized (ADOPTION_EVENTS) {
         System.out
             .println(ADOPTION_EVENTS.stream().map(e -> e.getMessage().getPayload().getValue().toString()).collect(toList()));
+        System.out
+            .println("ADOPTION_EVENTS size is   " + ADOPTION_EVENTS.size() + "       ALL_PETS size is   " + ALL_PETS.size());
+
         return ADOPTION_EVENTS.size() > ALL_PETS.size();
       }
     });
