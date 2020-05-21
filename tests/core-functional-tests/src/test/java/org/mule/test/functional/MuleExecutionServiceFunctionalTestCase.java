@@ -27,6 +27,9 @@ import org.mule.tck.junit4.rule.SystemProperty;
 
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -39,6 +42,7 @@ public class MuleExecutionServiceFunctionalTestCase extends MuleArtifactFunction
   private static final String SET_PAYLOAD_FLOW_NAME = "set-payload-flow";
   private static final String FILE_FLOW_NAME = "file-flow";
   private static final String FILE_CONFIG_NAME = "fileConfig";
+  private static final String MULTIPLE_PROCESSORS_FLOW = "multiple-processors-flow";
 
   @Rule
   public SystemProperty workingDir = new SystemProperty("workingDir",
@@ -67,7 +71,7 @@ public class MuleExecutionServiceFunctionalTestCase extends MuleArtifactFunction
     final Location location = Location.builder().globalName("missing").build();
     expectedException.expect(MuleRuntimeException.class);
     expectedException.expectMessage("not found");
-    executionService.execute(location, testEvent()).get();
+    executionService.execute(testEvent(), location).get();
   }
 
   @Test
@@ -75,34 +79,34 @@ public class MuleExecutionServiceFunctionalTestCase extends MuleArtifactFunction
     final Location location = Location.builder().globalName(FILE_CONFIG_NAME).build();
     expectedException.expect(MuleRuntimeException.class);
     expectedException.expectMessage("Located component is not executable");
-    executionService.execute(location, testEvent()).get();
+    executionService.execute(testEvent(), location).get();
   }
 
   @Test
   public void executeSetPayload() throws Exception {
     final Location location = Location.builder().globalName(SET_PAYLOAD_FLOW_NAME).addProcessorsPart().addIndexPart(0).build();
-    final Event result = executionService.execute(location, testEvent()).get();
+    final Event result = executionService.execute(testEvent(), location).get();
     assertThat(result.getMessage().getPayload().getValue(), is(equalTo("SUCCESS")));
   }
 
   @Test
   public void executeFlow() throws Exception {
     final Location location = Location.builder().globalName(SET_PAYLOAD_FLOW_NAME).build();
-    final Event result = executionService.execute(location, testEvent()).get();
+    final Event result = executionService.execute(testEvent(), location).get();
     assertThat(result.getMessage().getPayload().getValue(), is(equalTo("SUCCESS")));
   }
 
   @Test
   public void executeStandalonePluginOperation() throws Exception {
     final Location location = Location.builder().globalName(FILE_FLOW_NAME).addProcessorsPart().addIndexPart(0).build();
-    final Event result = executionService.execute(location, testEvent()).get();
+    final Event result = executionService.execute(testEvent(), location).get();
     assertThat(IOUtils.toString((CursorStreamProvider) result.getMessage().getPayload().getValue()), is(equalTo("SUCCESS")));
   }
 
   @Test
   public void executeStandaloneConfigAwarePluginOperation() throws Exception {
     final Location location = Location.builder().globalName(FILE_FLOW_NAME).addProcessorsPart().addIndexPart(1).build();
-    final Event result = executionService.execute(location, testEvent()).get();
+    final Event result = executionService.execute(testEvent(), location).get();
     assertThat(IOUtils.toString((CursorStreamProvider) result.getMessage().getPayload().getValue()), is(equalTo("SUCCESS")));
   }
 
@@ -114,8 +118,20 @@ public class MuleExecutionServiceFunctionalTestCase extends MuleArtifactFunction
                                  .withStatus(200)
                                  .withBody("SUCCESS")));
     final Location requesterLocation = Location.builder().globalName("http-flow").addProcessorsPart().addIndexPart(0).build();
-    final Event result = executionService.execute(requesterLocation, testEvent()).get();
+    final Event result = executionService.execute(testEvent(), requesterLocation).get();
     assertThat(IOUtils.toString((CursorStreamProvider) result.getMessage().getPayload().getValue()), is(equalTo("SUCCESS")));
+  }
+
+  @Test
+  public void executeMultipleComponents() throws Exception {
+    List<Location> locations = new ArrayList<>();
+    StringBuilder expectedResponseBuilder = new StringBuilder(TEST_PAYLOAD);
+    for (int i = 0; i < 5; i++) {
+      locations.add(Location.builder().globalName(MULTIPLE_PROCESSORS_FLOW).addProcessorsPart().addIndexPart(i).build());
+      expectedResponseBuilder.append(i);
+      final Event result = executionService.execute(testEvent(), locations).get();
+      assertThat(result.getMessage().getPayload().getValue(), is(equalTo(expectedResponseBuilder.toString())));
+    }
   }
 
 }

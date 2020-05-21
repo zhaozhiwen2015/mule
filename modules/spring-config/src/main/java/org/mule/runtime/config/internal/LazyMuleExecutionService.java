@@ -16,6 +16,7 @@ import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.config.api.LazyComponentInitializer;
 import org.mule.runtime.config.internal.dsl.model.NoSuchComponentModelException;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -33,17 +34,27 @@ public class LazyMuleExecutionService implements ExecutionService, Initialisable
   }
 
   @Override
-  public CompletableFuture<Event> execute(Location location, Event event) {
-    try {
-      componentInitializer.initializeComponent(location);
-    } catch (NoSuchComponentModelException e) {
-      throw new MuleRuntimeException(createStaticMessage("Component with location %s not found", location));
-    }
-    return this.executionService.execute(location, event);
+  public CompletableFuture<Event> execute(Event event, Location location) {
+    initialiseComponent(location);
+    return this.executionService.execute(event, location);
+  }
+
+  @Override
+  public CompletableFuture<Event> execute(Event event, List<Location> locations) {
+    locations.forEach(this::initialiseComponent);
+    return this.executionService.execute(event, locations);
   }
 
   @Override
   public void initialise() throws InitialisationException {
     this.executionService = executionServiceSupplier.get();
+  }
+
+  private void initialiseComponent(Location location) {
+    try {
+      componentInitializer.initializeComponent(location);
+    } catch (NoSuchComponentModelException e) {
+      throw new MuleRuntimeException(createStaticMessage("Component with location %s not found", location));
+    }
   }
 }

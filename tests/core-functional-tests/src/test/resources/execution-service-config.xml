@@ -29,4 +29,12 @@
         <http:request config-ref="requesterConfig" path="mockedServer" method="GET"/>
     </flow>
 
+    <flow name="multiple-processors-flow">
+        <set-payload value="#[payload ++ '0']"/>
+        <set-payload value="#[payload ++ '1']"/>
+        <set-payload value="#[payload ++ '2']"/>
+        <set-payload value="#[payload ++ '3']"/>
+        <set-payload value="#[payload ++ '4']"/>
+    </flow>
+
 </mule>
