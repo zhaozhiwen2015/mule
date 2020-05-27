@@ -189,13 +189,10 @@ class ComponentAstBasedElementModelFactory {
       }
 
       private void onComponentModel(final ComponentModel model) {
-        final DslElementSyntax elementDsl = dsl.resolve(model);
-        getIdentifier(elementDsl)
-            .filter(elementId -> elementId.equals(identifier))
-            .ifPresent(elementId -> {
-              elementModel.set(createElementModel(model, elementDsl, configuration).build());
-              stop();
-            });
+        if (configuration.getModel(ComponentModel.class).map(model::equals).orElse(false)) {
+          elementModel.set(createElementModel(model, dsl.resolve(model), configuration).build());
+          stop();
+        }
       }
 
     }.walk(currentExtension);
