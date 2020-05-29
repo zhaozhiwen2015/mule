@@ -67,6 +67,7 @@ import org.mule.runtime.api.meta.model.operation.OperationModel;
 import org.mule.runtime.api.meta.model.parameter.ParameterRole;
 import org.mule.runtime.api.util.Pair;
 import org.mule.runtime.ast.api.ComponentAst;
+import org.mule.runtime.ast.api.builder.ArtifactAstBuilder;
 import org.mule.runtime.ast.api.util.BaseComponentAstDecorator;
 import org.mule.runtime.config.api.dsl.model.properties.ConfigurationPropertiesProvider;
 import org.mule.runtime.config.api.dsl.model.properties.ConfigurationProperty;
@@ -410,7 +411,11 @@ public final class XmlExtensionLoaderDelegate {
     final ConfigLine configLine = parseModule.get();
     final ConfigurationPropertiesResolver externalPropertiesResolver = getConfigurationPropertiesResolver(configLine);
     final ComponentModelReader componentModelReader = new ComponentModelReader(externalPropertiesResolver);
-    return componentModelReader.extractComponentDefinitionModel(configLine, modulePath);
+
+    final ArtifactAstBuilder artifactAstBuilder = ArtifactAstBuilder.builder(extensions);
+    artifactAstBuilder.addTopLevelComponent();
+    componentModelReader.extractComponentDefinitionModel(configLine, modulePath, artifactAstBuilder.addTopLevelComponent());
+    return artifactAstBuilder.build().topLevelComponentsStream().findAny().get();
   }
 
   private ConfigurationPropertiesResolver getConfigurationPropertiesResolver(ConfigLine configLine) {

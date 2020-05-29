@@ -12,10 +12,13 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.initialiseIfNeeded;
 import static org.mule.runtime.core.api.util.IOUtils.getResourceAsUrl;
 import static org.springframework.util.ReflectionUtils.findMethod;
+
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.config.ConfigurationBuilder;
 import org.mule.runtime.core.api.config.builders.AbstractConfigurationBuilder;
 import org.mule.runtime.core.api.extension.ExtensionManager;
+import org.mule.runtime.core.api.extension.RuntimeExtensionModelProvider;
+import org.mule.runtime.core.api.registry.SpiServiceRegistry;
 import org.mule.runtime.extension.api.loader.ExtensionModelLoader;
 import org.mule.runtime.extension.api.resources.GeneratedResource;
 import org.mule.runtime.extension.api.resources.ResourcesGenerator;
@@ -87,6 +90,11 @@ public abstract class ExtensionFunctionalTestCase extends FunctionalTestCase {
 
     muleContext.setExtensionManager(extensionManager);
     initialiseIfNeeded(extensionManager, muleContext);
+
+    new SpiServiceRegistry()
+        .lookupProviders(RuntimeExtensionModelProvider.class, Thread.currentThread().getContextClassLoader())
+        .stream().map(RuntimeExtensionModelProvider::createExtensionModel)
+        .forEach(extensionManager::registerExtension);
 
     ExtensionsTestInfrastructureDiscoverer discoverer = new ExtensionsTestInfrastructureDiscoverer(extensionManager);
 
