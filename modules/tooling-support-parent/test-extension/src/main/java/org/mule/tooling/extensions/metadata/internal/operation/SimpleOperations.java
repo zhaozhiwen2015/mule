@@ -23,18 +23,18 @@ import org.mule.tooling.extensions.metadata.internal.value.ConfigLessNoActingPar
 public class SimpleOperations {
 
   @OutputResolver(output = ConfigLessConnectionLessMetadataResolver.class)
-  public Result<Void, Object> configLessConnectionLessOP(@Config SimpleConfiguration configuration,
+  public Result<Object, Object> configLessConnectionLessOP(@Config SimpleConfiguration configuration,
                                                          @Connection TstExtensionClient client,
                                                          @Optional @OfValues(ConfigLessConnectionLessNoActingParamVP.class) String providedParameter,
-                                                         @Optional @MetadataKeyId(ConfigLessConnectionLessMetadataResolver.class) String metadataKey) {
+                                                         @Optional @MetadataKeyId(ConfigLessConnectionLessMetadataResolver.class) SimpleMetadataKey metadataKey) {
     return null;
   }
 
   @OutputResolver(output = ConfigLessMetadataResolver.class)
-  public Result<Void, Object> configLessOP(@Config SimpleConfiguration configuration,
+  public Result<Object, Object> configLessOP(@Config SimpleConfiguration configuration,
                                            @Connection TstExtensionClient client,
                                            @Optional @OfValues(ConfigLessNoActingParamVP.class) String providedParameter,
-                                           @Optional @MetadataKeyId(ConfigLessMetadataResolver.class) String metadataKey) {
+                                           @Optional @MetadataKeyId(ConfigLessMetadataResolver.class) SimpleMetadataKey metadataKey) {
     return null;
   }
 

@@ -13,6 +13,7 @@ import static java.util.stream.Collectors.toList;
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.api.value.ResolvingFailure.Builder.newFailure;
 import static org.mule.runtime.core.internal.event.NullEventFactory.getNullEvent;
+import static org.mule.runtime.core.api.util.ClassUtils.withContextClassLoader;
 import static org.mule.runtime.extension.api.metadata.NullMetadataResolver.NULL_CATEGORY_NAME;
 import static org.mule.runtime.module.extension.internal.util.MuleExtensionUtils.getClassLoader;
 import static org.mule.runtime.module.tooling.internal.data.DefaultDataProviderResult.success;
@@ -21,14 +22,19 @@ import static org.mule.runtime.module.tooling.internal.data.DefaultDataValue.fro
 import static org.mule.runtime.module.tooling.internal.data.NoOpMetadataCache.getNoOpCache;
 import static org.mule.runtime.module.tooling.internal.data.ParameterExtractor.extractValue;
 import org.mule.runtime.api.component.Component;
+import org.mule.metadata.internal.utils.MetadataTypeWriter;
 import org.mule.runtime.api.component.location.ConfigurationComponentLocator;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.api.meta.model.ComponentModel;
+import org.mule.runtime.api.meta.model.HasOutputModel;
+import org.mule.runtime.api.meta.model.OutputModel;
 import org.mule.runtime.api.meta.model.config.ConfigurationModel;
 import org.mule.runtime.api.meta.model.parameter.ParameterizedModel;
 import org.mule.runtime.api.metadata.MetadataContext;
+import org.mule.runtime.api.metadata.MetadataKey;
 import org.mule.runtime.api.metadata.MetadataKeysContainer;
+import org.mule.runtime.api.metadata.descriptor.ComponentMetadataDescriptor;
 import org.mule.runtime.api.metadata.resolving.MetadataResult;
 import org.mule.runtime.api.util.LazyValue;
 import org.mule.runtime.api.util.Reference;
@@ -46,7 +52,9 @@ import org.mule.runtime.core.api.el.ExpressionManager;
 import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.runtime.core.api.transaction.TransactionConfig;
 import org.mule.runtime.extension.api.declaration.type.ExtensionsTypeLoaderFactory;
+import org.mule.runtime.extension.api.property.ClassLoaderModelProperty;
 import org.mule.runtime.extension.api.property.MetadataKeyIdModelProperty;
+import org.mule.runtime.extension.api.property.TypeResolversInformationModelProperty;
 import org.mule.runtime.extension.api.runtime.config.ConfigurationInstance;
 import org.mule.runtime.extension.api.runtime.operation.ExecutionContext;
 import org.mule.runtime.extension.api.values.ValueResolvingException;
@@ -74,11 +82,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class InternalDataProviderService implements DataProviderService {
 
@@ -165,6 +175,36 @@ public class InternalDataProviderService implements DataProviderService {
     return results;
   }
 
+  private <T extends ComponentModel> void resolveMetadataType(T model, MetadataKeysContainer metadataKeysContainer) {
+    if (model instanceof HasOutputModel) {
+      OutputModel outputModel = ((HasOutputModel) model).getOutput();
+      if (outputModel.hasDynamicType()) {// or if outputAttributes is dynamic, or any of its input parameters is dynamic
+        model.getModelProperty(TypeResolversInformationModelProperty.class).ifPresent(typeResolversInformationModelProperty -> {
+          MetadataMediator<T> metadataMediator = new MetadataMediator<>(model);
+          Set<MetadataKey> metadataKeys = metadataKeysContainer.getKeysByCategory().get(typeResolversInformationModelProperty.getCategoryName());
+          metadataKeys.forEach(key -> {
+            ClassLoader extensionClassLoader = getExtensionClassLoader();
+            withContextClassLoader(extensionClassLoader, () -> {
+              MetadataResult<ComponentMetadataDescriptor<T>> metadata = metadataMediator.getMetadata(createMetadataContext(), key);
+              if (metadata.isSuccess()) {
+                System.out.println(ToStringBuilder.reflectionToString(metadata.get().getMetadataAttributes()));
+                System.out.println(new MetadataTypeWriter().toString(((HasOutputModel) metadata.get().getModel()).getOutput().getType()));
+              } else {
+                System.err.println("error while resolving metadata for key: " + key + " " + metadata.getFailures());
+              }
+            });
+          });
+        });
+      }
+    }
+
+  }
+
+  //TODO improve this!
+  private ClassLoader getExtensionClassLoader() {
+    return artifactHelper().getExtensionModel(artifactHelper().findConfigurationDeclaration().get()).getModelProperty(ClassLoaderModelProperty.class).get().getClassLoader();
+  }
+
   private <T extends ComponentModel> List<DataResult> resolveValues(T model) {
     return model.getAllParameterModels()
         .stream()
@@ -176,6 +216,10 @@ public class InternalDataProviderService implements DataProviderService {
   private <T extends ComponentModel> List<DataResult> resolveMetadataKeys(T model, Predicate<String> categoryFilter) {
     MetadataMediator<T> metadataMediator = new MetadataMediator<>(model);
     MetadataResult<MetadataKeysContainer> keysResult = metadataMediator.getMetadataKeys(createMetadataContext(), reflectionCache);
+
+    if (keysResult.isSuccess()) {
+      resolveMetadataType(model, keysResult.get());
+    }
 
     return keysResult.get()
         .getKeysByCategory()
