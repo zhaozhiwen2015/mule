@@ -413,7 +413,6 @@ public final class XmlExtensionLoaderDelegate {
     final ComponentModelReader componentModelReader = new ComponentModelReader(externalPropertiesResolver);
 
     final ArtifactAstBuilder artifactAstBuilder = ArtifactAstBuilder.builder(extensions);
-    artifactAstBuilder.addTopLevelComponent();
     componentModelReader.extractComponentDefinitionModel(configLine, modulePath, artifactAstBuilder.addTopLevelComponent());
     return artifactAstBuilder.build().topLevelComponentsStream().findAny().get();
   }

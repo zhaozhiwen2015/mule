@@ -55,6 +55,7 @@ import org.mule.runtime.app.declaration.api.ArtifactDeclaration;
 import org.mule.runtime.app.declaration.api.ElementDeclaration;
 import org.mule.runtime.ast.api.ArtifactAst;
 import org.mule.runtime.ast.api.ComponentAst;
+import org.mule.runtime.ast.api.ComponentMetadataAst;
 import org.mule.runtime.ast.api.builder.ArtifactAstBuilder;
 import org.mule.runtime.ast.api.builder.ComponentAstBuilder;
 import org.mule.runtime.ast.api.util.AstTraversalDirection;

@@ -342,12 +342,7 @@ public class MuleArtifactContext extends AbstractRefreshableConfigApplicationCon
       ResourceProvider externalResourceProvider = new ClassLoaderResourceProvider(muleContext.getExecutionClassLoader());
       return new ApplicationModel(artifactConfig, artifactDeclaration, getExtensions(),
                                   artifactProperties, parentConfigurationProperties,
-<<<<<<< Upstream, based on origin/master
-                                  of(componentBuildingDefinitionRegistry),
                                   externalResourceProvider);
-=======
-                                  externalResourceProvider, isRuntimeMode());
->>>>>>> d276d5e finxink, really need the test plugin migration to the sk
     } catch (MuleRuntimeException e) {
       throw e;
     } catch (Exception e) {
