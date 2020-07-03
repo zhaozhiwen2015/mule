@@ -65,6 +65,9 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -75,6 +78,8 @@ import com.google.common.collect.Multimap;
  * @since 4.4
  */
 public final class ApplicationModelTypeUtils {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationModelTypeUtils.class);
 
   private static final ClassTypeLoader typeLoader = ExtensionsTypeLoaderFactory.getDefault().createTypeLoader();
 
@@ -537,6 +542,12 @@ public final class ApplicationModelTypeUtils {
                                                                                        paramComponent.getMetadata()));
               paramComponent.getInnerComponents().stream().forEach(itemComponent -> {
                 String typeId = itemIdentifiers.get(itemComponent.getIdentifier());
+
+                if (!typesDslMap.containsKey(typeId)) {
+                  LOGGER.warn("getArrayItemTypeVisitor.visitObject: No entry for '{}' in typesDslMap.", typeId);
+                  // return;
+                }
+
                 typesDslMap.get(typeId).ifPresent(subTypeDsl -> {
                   MetadataTypeModelAdapter parameterizedModel =
                       createParameterizedTypeModelAdapter(objectTypeByTypeId.get(typeId), extensionModelHelper);
@@ -559,8 +570,19 @@ public final class ApplicationModelTypeUtils {
                                                                         ParameterModel nestedParameter) {
         return subTypeDsl.getContainedElement(nestedParameter.getName())
             .map(innerElement -> getTypeId(nestedParameter.getType())
-                .flatMap(typeId -> typesDslMap.containsKey(typeId) ? typesDslMap.get(typeId) : empty())
+                .flatMap(typeId -> {
+                  if (typesDslMap.containsKey(typeId)) {
+                    LOGGER
+                        .warn("getArrayItemTypeVisitor.recursiveAwareContainedElement: No entry for '{}' in typesDslMap, ignoring.",
+                              typeId);
+                    return typesDslMap.get(typeId);
+                  } else {
+                    return empty();
+                  }
+                })
                 .map(referencedDslElement -> {
+                  LOGGER.debug("getArrayItemTypeVisitor.recursiveAwareContainedElement: processing typeId {}",
+                               referencedDslElement.toString());
                   final DslElementSyntaxBuilder baseReferenced = DslElementSyntaxBuilder.create()
                       .withAttributeName(innerElement.getAttributeName())
                       .withElementName(innerElement.getElementName())
