@@ -217,7 +217,6 @@ public class ApplicationModel implements ArtifactAst {
    * @param externalResourceProvider            the provider for configuration properties files and ${file::name.txt} placeholders
    * @throws Exception when the application configuration has semantic errors.
    */
-  // TODO: MULE-9638 remove this optional
   public ApplicationModel(ArtifactConfig artifactConfig, ArtifactDeclaration artifactDeclaration,
                           Set<ExtensionModel> extensionModels,
                           Map<String, String> deploymentProperties,
@@ -641,21 +640,23 @@ public class ApplicationModel implements ArtifactAst {
   }
 
   private void validateFlowRefPointsToExistingFlow() {
-    recursiveStream().forEach(componentModel -> {
-      if (componentModel.getIdentifier().equals(FLOW_REF_IDENTIFIER)) {
-        String nameAttribute = componentModel.getComponentId().orElse(null);
-        if (nameAttribute != null && !nameAttribute.startsWith(DEFAULT_EXPRESSION_PREFIX)) {
-          Optional<ComponentAst> referencedFlow = findTopLevelNamedComponent(nameAttribute);
-          referencedFlow
-              .orElseThrow(() -> new MuleRuntimeException(createStaticMessage("flow-ref at %s:%s is pointing to %s which does not exist",
-                                                                              componentModel.getMetadata().getFileName()
-                                                                                  .orElse("unknown"),
-                                                                              componentModel.getMetadata().getStartLine()
-                                                                                  .orElse(-1),
-                                                                              nameAttribute)));
-        }
-      }
-    });
+    recursiveStream()
+        .filter(componentModel -> componentModel.getIdentifier().equals(FLOW_REF_IDENTIFIER))
+        .forEach(componentModel -> {
+          componentModel.getParameter("name").getValue().applyRight(nameAttribute -> {
+            // Need to check this, since the name field is a reference according to the extModel and the AST assumes there are no
+            // expressions there.
+            if (!((String) nameAttribute).startsWith(DEFAULT_EXPRESSION_PREFIX)) {
+              findTopLevelNamedComponent((String) nameAttribute)
+                  .orElseThrow(() -> new MuleRuntimeException(createStaticMessage("flow-ref at %s:%s is pointing to %s which does not exist",
+                                                                                  componentModel.getMetadata().getFileName()
+                                                                                      .orElse("unknown"),
+                                                                                  componentModel.getMetadata().getStartLine()
+                                                                                      .orElse(-1),
+                                                                                  nameAttribute)));
+            }
+          });
+        });
   }
 
   private void validateParameterAndChildForSameAttributeAreNotDefinedTogether() {

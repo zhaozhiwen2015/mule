@@ -188,7 +188,8 @@ class MuleExtensionModelDeclarer {
         .withDeprecation(new ImmutableDeprecationModel("Only meant to be used for backwards compatibility.", "4.0", "5.0"));
 
     object.onDefaultParameterGroup()
-        .withOptionalParameter("name")
+        .withRequiredParameter("name")
+        .asComponentId()
         .ofType(typeLoader.load(String.class))
         .withExpressionSupport(NOT_SUPPORTED)
         .describedAs("Name to use to reference this object.");
@@ -766,11 +767,18 @@ class MuleExtensionModelDeclarer {
 
     onError.onDefaultParameterGroup()
         .withRequiredParameter("ref")
+        .withAllowedStereotypes(asList(ON_ERROR))
         .ofType(typeLoader.load(String.class))
         .withExpressionSupport(NOT_SUPPORTED)
         .describedAs("The name of the error handler to reuse.");
 
     // TODO MULE-13277 errorHandler.isOneRouteRequired(true);
+
+    // global onError's that may be referenced from an error handler
+    declareGlobalOnErrorRoute(typeLoader, extensionDeclarer.withConstruct("onErrorContinue")
+        .describedAs("Error handler used to handle errors. It will commit any transaction as if the message was consumed successfully."));
+    declareGlobalOnErrorRoute(typeLoader, extensionDeclarer.withConstruct("onErrorPropagate")
+        .describedAs("Error handler used to propagate errors. It will rollback any transaction and not consume messages."));
   }
 
   private void declareOnErrorRoute(ClassTypeLoader typeLoader, NestedRouteDeclarer onError) {
@@ -803,6 +811,47 @@ class MuleExtensionModelDeclarer {
         .withExpressionSupport(NOT_SUPPORTED)
         .describedAs("Determines whether ExceptionNotifications will be fired from this strategy when an exception occurs."
             + " Default is true.");
+  }
+
+  private void declareGlobalOnErrorRoute(ClassTypeLoader typeLoader, ConstructDeclarer onError) {
+    onError.withStereotype(ON_ERROR)
+        .withChain();
+
+    onError.onDefaultParameterGroup()
+        .withRequiredParameter("name")
+        .asComponentId()
+        .ofType(typeLoader.load(String.class));
+
+    // onError.onDefaultParameterGroup()
+    // .withOptionalParameter("when")
+    // .ofType(typeLoader.load(String.class))
+    // .describedAs("The expression that will be evaluated to determine if this exception strategy should be executed. "
+    // + "This should always be a boolean expression.");
+    //
+    // onError.onDefaultParameterGroup()
+    // .withOptionalParameter("type")
+    // .ofType(BaseTypeBuilder.create(JAVA).stringType()
+    // .enumOf("ANY", "REDELIVERY_EXHAUSTED", "TRANSFORMATION", "EXPRESSION", "SECURITY", "CLIENT_SECURITY",
+    // "SERVER_SECURITY", "ROUTING", "CONNECTIVITY", "RETRY_EXHAUSTED", "TIMEOUT")
+    // .build())
+    // .withExpressionSupport(NOT_SUPPORTED)
+    // .describedAs("The full name of the error type to match against or a comma separated list of full names, "
+    // + "to match against any of them.");
+    //
+    // onError.onDefaultParameterGroup()
+    // .withOptionalParameter("logException")
+    // .ofType(typeLoader.load(boolean.class))
+    // .defaultingTo(true)
+    // .describedAs("Determines whether the handled exception will be logged to its standard logger in the ERROR "
+    // + "level before being handled. Default is true.");
+    //
+    // onError.onDefaultParameterGroup()
+    // .withOptionalParameter("enableNotifications")
+    // .ofType(typeLoader.load(boolean.class))
+    // .defaultingTo(true)
+    // .withExpressionSupport(NOT_SUPPORTED)
+    // .describedAs("Determines whether ExceptionNotifications will be fired from this strategy when an exception occurs."
+    // + " Default is true.");
   }
 
   private void declareErrors(ExtensionDeclarer extensionDeclarer) {
