@@ -33,7 +33,6 @@ import static org.mule.runtime.config.internal.dsl.model.extension.xml.MacroExpa
 import static org.mule.runtime.config.internal.dsl.model.extension.xml.MacroExpansionModuleModel.TNS_PREFIX;
 import static org.mule.runtime.config.internal.dsl.model.extension.xml.MacroExpansionModulesModel.getUsedNamespaces;
 import static org.mule.runtime.config.internal.model.ApplicationModel.GLOBAL_PROPERTY;
-import static org.mule.runtime.config.internal.model.type.ApplicationModelTypeUtils.resolveTypedComponentIdentifier;
 import static org.mule.runtime.core.api.exception.Errors.ComponentIdentifiers.Handleable.ANY;
 import static org.mule.runtime.dsl.api.xml.parser.XmlConfigurationDocumentLoader.schemaValidatingDocumentLoader;
 import static org.mule.runtime.extension.api.util.XmlModelUtils.createXmlLanguageModel;
@@ -73,7 +72,6 @@ import org.mule.runtime.config.api.dsl.model.properties.ConfigurationPropertiesP
 import org.mule.runtime.config.api.dsl.model.properties.ConfigurationProperty;
 import org.mule.runtime.config.internal.ModuleDelegatingEntityResolver;
 import org.mule.runtime.config.internal.dsl.model.ClassLoaderResourceProvider;
-import org.mule.runtime.config.internal.dsl.model.ComponentLocationVisitor;
 import org.mule.runtime.config.internal.dsl.model.ComponentModelReader;
 import org.mule.runtime.config.internal.dsl.model.ExtensionModelHelper;
 import org.mule.runtime.config.internal.dsl.model.config.ConfigurationPropertiesResolver;
@@ -460,10 +458,6 @@ public final class XmlExtensionLoaderDelegate {
                                                                 MODULE_IDENTIFIER.toString(),
                                                                 moduleModel.getIdentifier().toString())));
     }
-
-    moduleModel.recursiveStream()
-        .forEach(componentModel -> resolveTypedComponentIdentifier((ComponentModel) componentModel, extensionModelHelper));
-    recursiveStreamWithHierarchy(moduleModel).forEach(new ComponentLocationVisitor());
 
     final String name = moduleModel.getRawParameterValue(MODULE_NAME).orElse(null);
     final String version = "4.0.0"; // TODO(fernandezlautaro): MULE-11010 remove version from ExtensionModel
