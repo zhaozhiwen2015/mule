@@ -1,4 +1,4 @@
-def UPSTREAM_PROJECTS_LIST = [ "Mule-runtime/metadata-model-api/master",
+def UPSTREAM_PROJECTS_LIST = [ "Mule-runtime/metadata-model-api/master-JULY-DRY-RUN",
                                "Mule-runtime/mule-api/master-JULY-DRY-RUN",
                                "Mule-runtime/mule-extensions-api/master-JULY-DRY-RUN",
                                "Mule-runtime/mule-artifact-ast/master-JULY-DRY-RUN",
