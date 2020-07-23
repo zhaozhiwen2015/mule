@@ -643,12 +643,6 @@ class DeclarationBasedElementModelFactory {
                                      InternalComponentConfiguration.Builder parentConfig,
                                      DslElementModel.Builder parentElement, ParameterModel parameterModel, boolean explicit) {
     if (paramDsl.supportsAttributeDeclaration()) {
-      // skip the name attribute for the case where it was already added
-      if (parameterModel.isComponentId()
-          && "name".equals(parameterModel.getName())) {
-        return;
-      }
-
       // attribute parameters imply no further nesting in the configs
       parentConfig.withParameter(paramDsl.getAttributeName(), value.getValue());
       parentElement.containing(DslElementModel.<ParameterModel>builder()
