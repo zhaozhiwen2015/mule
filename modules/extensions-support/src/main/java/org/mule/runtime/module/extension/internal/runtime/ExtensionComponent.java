@@ -29,6 +29,7 @@ import org.mule.metadata.api.model.MetadataType;
 import org.mule.runtime.api.component.AbstractComponent;
 import org.mule.runtime.api.component.location.ConfigurationComponentLocator;
 import org.mule.runtime.api.connection.ConnectionException;
+import org.mule.runtime.api.dsl.DslResolvingContext;
 import org.mule.runtime.api.exception.DefaultMuleException;
 import org.mule.runtime.api.exception.ErrorTypeRepository;
 import org.mule.runtime.api.exception.MuleException;
@@ -613,11 +614,12 @@ public abstract class ExtensionComponent<T extends ComponentModel> extends Abstr
   }
 
   private void setCacheIdGenerator() {
+    DslResolvingContext context = DslResolvingContext.getDefault(extensionManager.getExtensions());
     ComponentLocator<ComponentAst> configLocator = location -> componentLocator
         .find(location)
         .map(component -> (ComponentAst) component.getAnnotation(ANNOTATION_COMPONENT_CONFIG));
 
-    this.cacheIdGenerator = cacheIdGeneratorFactory.create(configLocator);
+    this.cacheIdGenerator = cacheIdGeneratorFactory.create(context, configLocator);
   }
 
   protected abstract ParameterValueResolver getParameterValueResolver();
