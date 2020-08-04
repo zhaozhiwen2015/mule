@@ -8,7 +8,11 @@ package org.mule.runtime.core.internal.streaming;
 
 import static java.lang.System.identityHashCode;
 
+import org.mule.runtime.api.streaming.CursorProvider;
+
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -20,7 +24,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  */
 public class EventStreamingState {
 
-  private final Cache<Integer, WeakReference<ManagedCursorProvider>> providers = Caffeine.newBuilder().build();
+  private final Cache<Integer, List<WeakReference<ManagedCursorProvider>>> providers = Caffeine.newBuilder().build();
 
   /**
    * Registers the given {@code provider} as one associated to the owning event.
@@ -55,7 +59,32 @@ public class EventStreamingState {
   private ManagedCursorProvider getOrAddManagedProvider(int hash,
                                                         ManagedCursorProvider provider,
                                                         StreamingGhostBuster ghostBuster) {
-    return providers.get(hash, k -> ghostBuster.track(provider)).get();
+    List<WeakReference<ManagedCursorProvider>> managedList = providers.get(hash, k -> new ArrayList<>(1));
+    ManagedCursorProvider managed;
+    synchronized (managedList) {
+      if (managedList.isEmpty()) {
+        WeakReference<ManagedCursorProvider> track = ghostBuster.track(provider);
+        managedList.add(track);
+        managed = track.get();
+      } else {
+        for (WeakReference<ManagedCursorProvider> entry : managedList) {
+          ManagedCursorProvider ref = entry.get();
+          if (ref == null) {
+
+            break;
+          } else if (ref.getDelegate() == provider.getDelegate()) {
+
+            break;
+          } else {
+            WeakReference<ManagedCursorProvider> track = ghostBuster.track(provider);
+            managedList.add(track);
+            managed = track.get();
+          }
+        }
+      }
+    }
+
+    return managed;
   }
 
   /**
