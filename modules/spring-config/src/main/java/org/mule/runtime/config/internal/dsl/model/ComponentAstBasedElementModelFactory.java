@@ -75,6 +75,7 @@ import org.mule.runtime.api.meta.model.source.SourceModel;
 import org.mule.runtime.api.meta.model.util.ExtensionWalker;
 import org.mule.runtime.api.util.Reference;
 import org.mule.runtime.ast.api.ComponentAst;
+import org.mule.runtime.ast.api.builder.ComponentAstBuilder;
 import org.mule.runtime.config.api.dsl.model.DslElementModel;
 import org.mule.runtime.config.api.dsl.model.DslElementModelFactory;
 import org.mule.runtime.core.api.source.scheduler.CronScheduler;
@@ -608,9 +609,9 @@ class ComponentAstBasedElementModelFactory {
   private void buildDefaultInlineGroupElement(DslElementModel.Builder parent, ParameterGroupModel group,
                                               DslElementSyntax groupDsl,
                                               ComponentIdentifier identifier) {
-    final org.mule.runtime.config.internal.model.ComponentModel.Builder groupCompAstBuilder =
-        new org.mule.runtime.config.internal.model.ComponentModel.Builder();
-    groupCompAstBuilder.setIdentifier(identifier);
+    final ComponentAstBuilder groupCompAstBuilder = ComponentAstBuilder.builder();
+
+    groupCompAstBuilder.withIdentifier(identifier);
 
     DslElementModel.Builder<ParameterGroupModel> groupElementBuilder = DslElementModel.<ParameterGroupModel>builder()
         .withModel(group)
@@ -629,13 +630,12 @@ class ComponentAstBasedElementModelFactory {
 
                   if (isContent(paramModel) || isText(paramModel)) {
                     getIdentifier(paramDsl)
-                        .ifPresent(tagId -> groupCompAstBuilder
-                            .addChildComponentModel(new org.mule.runtime.config.internal.model.ComponentModel.Builder()
-                                .setIdentifier(tagId)
-                                .setTextContent(defaultValue)
-                                .build()));
+                        .ifPresent(tagId -> groupCompAstBuilder.addChildComponent()
+                            .withIdentifier(tagId)
+                            .withRawParameter(BODY_RAW_PARAM_NAME, defaultValue)
+                            .build());
                   } else {
-                    groupCompAstBuilder.addParameter(paramDsl.getAttributeName(), defaultValue, true);
+                    groupCompAstBuilder.withRawParameter(defaultValue, paramDsl.getAttributeName());
                   }
 
                   groupElementBuilder.containing(paramElementBuilder.build());

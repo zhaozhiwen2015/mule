@@ -38,9 +38,6 @@ import org.mule.runtime.ast.api.ComponentAst;
 import org.mule.runtime.ast.api.ComponentMetadataAst;
 import org.mule.runtime.ast.api.ComponentParameterAst;
 import org.mule.runtime.ast.api.util.AstTraversalDirection;
-import org.mule.runtime.config.internal.model.type.MetadataTypeModelAdapter;
-import org.mule.runtime.dsl.api.component.config.ComponentConfiguration;
-import org.mule.runtime.dsl.internal.component.config.InternalComponentConfiguration;
 import org.mule.runtime.extension.api.error.ErrorMapping;
 
 import java.util.ArrayList;
@@ -98,7 +95,6 @@ public class ComponentModel implements ComponentAst {
   private NestableElementModel nestableElementModel;
   private ConfigurationModel configurationModel;
   private ConnectionProviderModel connectionProviderModel;
-  private MetadataTypeModelAdapter metadataTypeModelAdapter;
 
   private ComponentMetadataAst componentMetadata;
 
@@ -370,12 +366,6 @@ public class ComponentModel implements ComponentAst {
       }
     }
 
-    if (metadataTypeModelAdapter != null) {
-      if (modelClass.isAssignableFrom(metadataTypeModelAdapter.getClass())) {
-        return Optional.of((M) metadataTypeModelAdapter);
-      }
-    }
-
     return empty();
   }
 
@@ -393,10 +383,6 @@ public class ComponentModel implements ComponentAst {
 
   public void setConnectionProviderModel(ConnectionProviderModel connectionProviderModel) {
     this.connectionProviderModel = connectionProviderModel;
-  }
-
-  public void setMetadataTypeModelAdapter(MetadataTypeModelAdapter metadataTypeModelAdapter) {
-    this.metadataTypeModelAdapter = metadataTypeModelAdapter;
   }
 
   /**

@@ -87,7 +87,6 @@ import org.mule.runtime.config.internal.dsl.model.extension.xml.property.Operati
 import org.mule.runtime.config.internal.dsl.model.extension.xml.property.PrivateOperationsModelProperty;
 import org.mule.runtime.config.internal.dsl.model.extension.xml.property.TestConnectionGlobalElementModelProperty;
 import org.mule.runtime.config.internal.dsl.xml.XmlNamespaceInfoProviderSupplier;
-import org.mule.runtime.config.internal.model.ComponentModel;
 import org.mule.runtime.config.internal.util.NoOpXmlErrorHandler;
 import org.mule.runtime.core.api.util.xmlsecurity.XMLSecureFactories;
 import org.mule.runtime.dsl.api.xml.parser.ConfigLine;
@@ -194,7 +193,8 @@ public final class XmlExtensionLoaderDelegate {
   /**
    * ENUM used to discriminate which visibility an <operation/> has.
    *
-   * @see {@link XmlExtensionLoaderDelegate#loadOperationsFrom(HasOperationDeclarer, ComponentModel, DirectedGraph, XmlDslModel, XmlExtensionLoaderDelegate.OperationVisibility)}
+   * @see {@link XmlExtensionLoaderDelegate#loadOperationsFrom(HasOperationDeclarer, ComponentAst, DirectedGraph, XmlDslModel,
+   *      XmlExtensionLoaderDelegate.OperationVisibility, Optional<ExtensionModel>)}
    */
   public enum OperationVisibility {
     PRIVATE, PUBLIC
