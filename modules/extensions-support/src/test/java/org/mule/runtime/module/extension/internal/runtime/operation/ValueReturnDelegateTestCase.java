@@ -12,22 +12,20 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
+import org.mule.runtime.api.component.Component;
 import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.api.message.Message;
 import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.tck.size.SmallTest;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 @SmallTest
-@RunWith(MockitoJUnitRunner.class)
 public class ValueReturnDelegateTestCase extends ValueReturnDelegateContractTestCase {
 
   @Override
   protected ReturnDelegate createReturnDelegate() throws InitialisationException {
-    return new ValueReturnDelegate(componentModel,
+    return new ValueReturnDelegate(mock(Component.class), componentModel,
                                    getCursorProviderFactory(), muleContext);
   }
 

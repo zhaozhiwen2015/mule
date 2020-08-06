@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.module.extension.internal.runtime.operation;
 
+import org.mule.runtime.api.component.Component;
 import org.mule.runtime.api.meta.model.ComponentModel;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.event.CoreEvent;
@@ -30,10 +31,11 @@ final class PayloadTargetReturnDelegate extends AbstractReturnDelegate {
    * @param target the name of the variable in which the output message will be set
    */
   PayloadTargetReturnDelegate(String target,
+                              Component ownerComponent,
                               ComponentModel componentModel,
                               CursorProviderFactory cursorProviderFactory,
                               MuleContext muleContext) {
-    super(componentModel, cursorProviderFactory, muleContext);
+    super(ownerComponent, componentModel, cursorProviderFactory, muleContext);
     this.target = target;
   }
 

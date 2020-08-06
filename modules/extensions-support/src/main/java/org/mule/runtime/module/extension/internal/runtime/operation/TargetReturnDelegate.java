@@ -9,6 +9,7 @@ package org.mule.runtime.module.extension.internal.runtime.operation;
 import static org.mule.runtime.api.el.BindingContextUtils.getTargetBindingContext;
 import static org.mule.runtime.api.message.Message.of;
 
+import org.mule.runtime.api.component.Component;
 import org.mule.runtime.api.el.CompiledExpression;
 import org.mule.runtime.api.el.ExpressionLanguageSession;
 import org.mule.runtime.api.meta.model.ComponentModel;
@@ -40,11 +41,12 @@ final class TargetReturnDelegate extends AbstractReturnDelegate {
    */
   TargetReturnDelegate(String target,
                        String targetValue,
+                       Component ownerComponent,
                        ComponentModel componentModel,
                        ExpressionManager expressionManager,
                        CursorProviderFactory cursorProviderFactory,
                        MuleContext muleContext) {
-    super(componentModel, cursorProviderFactory, muleContext);
+    super(ownerComponent, componentModel, cursorProviderFactory, muleContext);
     this.expressionManager = expressionManager;
     this.target = target;
     this.targetValue = expressionManager.compile(targetValue, getTargetBindingContext(of("")));

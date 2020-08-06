@@ -22,6 +22,7 @@ import static org.mule.runtime.module.extension.internal.util.MediaTypeUtils.get
 import static org.mule.runtime.module.extension.internal.util.MuleExtensionUtils.returnsListOfMessages;
 
 import org.mule.metadata.api.model.MetadataType;
+import org.mule.runtime.api.component.Component;
 import org.mule.runtime.api.connection.ConnectionHandler;
 import org.mule.runtime.api.event.Event;
 import org.mule.runtime.api.message.Message;
@@ -72,6 +73,7 @@ import org.apache.commons.io.input.ProxyInputStream;
 abstract class AbstractReturnDelegate implements ReturnDelegate {
 
   protected final MuleContext muleContext;
+  private final Component ownerComponent;
   private boolean returnsListOfMessages = false;
   private final CursorProviderFactory cursorProviderFactory;
   private final MediaType defaultMediaType;
@@ -88,9 +90,11 @@ abstract class AbstractReturnDelegate implements ReturnDelegate {
    *        {@code null}
    * @param muleContext the {@link MuleContext} of the owning application
    */
-  protected AbstractReturnDelegate(ComponentModel componentModel,
+  protected AbstractReturnDelegate(Component ownerComponent,
+                                   ComponentModel componentModel,
                                    CursorProviderFactory cursorProviderFactory,
                                    MuleContext muleContext) {
+    this.ownerComponent = ownerComponent;
 
     if (componentModel instanceof HasOutputModel) {
       HasOutputModel hasOutputModel = (HasOutputModel) componentModel;
@@ -134,6 +138,15 @@ abstract class AbstractReturnDelegate implements ReturnDelegate {
               .output(new ConnectedInputStreamWrapper((InputStream) resultValue.getOutput(), connectionHandler))
               .build();
         }
+        // TODO MULE-18652 decorate for ABP
+        resultValue = resultValue.copy()
+            .output(resultValue.getOutput())
+            .build();
+      } else if (resultValue.getOutput() instanceof Iterator) {
+        // TODO MULE-18652 decorate for ABP
+        resultValue = resultValue.copy()
+            .output(resultValue.getOutput())
+            .build();
       }
       return isSpecialHandling && returnHandler.handles(resultValue.getOutput())
           ? MessageUtils.toMessage(resultValue, mediaType, cursorProviderFactory, event, returnHandler.getDataType())
@@ -216,6 +229,12 @@ abstract class AbstractReturnDelegate implements ReturnDelegate {
       if (connectionHandler != null && supportsStreaming(operationContext.getComponentModel())) {
         value = new ConnectedInputStreamWrapper((InputStream) value, connectionHandler);
       }
+
+      // TODO MULE-18652 decorate for ABP
+      value = value;
+    } else if (value instanceof Iterator) {
+      // TODO MULE-18652 decorate for ABP
+      value = value;
     }
 
     return StreamingUtils.streamingContent(value, cursorProviderFactory, eventContext);

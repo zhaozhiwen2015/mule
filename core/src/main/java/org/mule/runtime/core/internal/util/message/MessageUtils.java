@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Function;
 
 /**
  * Utility methods for handling {@link Message messages}
@@ -102,6 +103,26 @@ public final class MessageUtils {
                                   CursorProviderFactory cursorProviderFactory,
                                   BaseEventContext eventContext) {
     Object value = streamingContent(result.getOutput(), cursorProviderFactory, eventContext);
+    return toMessage(result, builder().fromObject(value).mediaType(mediaType).build(), value);
+  }
+
+  /**
+   * Transforms the given {@code result} into a {@link Message}.
+   *
+   * @param result a {@link Result} object
+   * @param mediaType the {@link MediaType} for the message payload, overrides the described in the {@code result}
+   * @param cursorProviderFactory Factory that in case of finding a value which can create a cursor (eg.: {@link InputStream} or
+   *        {@link Iterator}), will create a {@link CursorProvider}
+   * @param eventContext Used for the case where a {@link CursorProvider} is created, register the one in it.
+   *
+   * @return a {@link Message}
+   */
+  public static Message toMessage(Result<?, ?> result,
+                                  Function<Object, Object> abpDecorate,
+                                  MediaType mediaType,
+                                  CursorProviderFactory cursorProviderFactory,
+                                  BaseEventContext eventContext) {
+    Object value = streamingContent(abpDecorate.apply(result.getOutput()), cursorProviderFactory, eventContext);
     return toMessage(result, builder().fromObject(value).mediaType(mediaType).build(), value);
   }
 

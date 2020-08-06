@@ -76,8 +76,10 @@ import org.mule.runtime.core.privileged.event.context.FlowProcessMediatorContext
 import org.mule.runtime.core.privileged.exception.ErrorTypeLocator;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -494,6 +496,7 @@ public class FlowProcessMediator implements Initialisable {
 
       Message eventMessage;
       if (resultValue instanceof Collection && adapter.isCollection()) {
+        // TODO MULE-18649 ABP File as an example?
         eventMessage = toMessage(Result.<Collection<Message>, TypedValue<?>>builder()
             .output(toMessageCollection(
                                         new MediaTypeDecoratedResultCollection((Collection<Result>) resultValue,
@@ -503,7 +506,20 @@ public class FlowProcessMediator implements Initialisable {
             .mediaType(result.getMediaType().orElse(ANY))
             .build());
       } else {
-        eventMessage = toMessage(result, adapter.getMediaType(), adapter.getCursorProviderFactory(),
+        eventMessage = toMessage(result, value -> {
+          if (value instanceof InputStream) {
+            // TODO MULE-18652 decorate for ABP
+            // final DataFlowStatistics dataFlowStatistics = muleContext.getStatistics().getDataFlowStatistics(source);
+            // dataFlowStatistics.isEnabled();
+
+            return value;
+          } else if (value instanceof Iterator) {
+            // TODO MULE-18652 decorate for ABP
+            return value;
+          } else {
+            return value;
+          }
+        }, adapter.getMediaType(), adapter.getCursorProviderFactory(),
                                  ((BaseEventContext) eventCtx).getRootContext());
       }
 

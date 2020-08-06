@@ -272,6 +272,7 @@ public final class MethodArgumentResolverDelegate implements ArgumentResolverDel
   }
 
   private ArgumentResolver<Object> addResolverDecorators(ArgumentResolver<Object> resolver, Parameter parameter) {
+    // TODO MULE-18654 MULE-18655 add a resolver decorator for ABP
     Class<?> argumentType = parameter.getType();
     if (argumentType.isPrimitive()) {
       resolver = addPrimitiveTypeDefaultValueDecorator(resolver, argumentType);

@@ -6,22 +6,23 @@
  */
 package org.mule.runtime.module.extension.internal.runtime.operation;
 
+import static org.mockito.Mockito.mock;
+
+import org.mule.runtime.api.component.Component;
 import org.mule.runtime.api.message.Message;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.tck.size.SmallTest;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 @SmallTest
-@RunWith(MockitoJUnitRunner.class)
 public class PayloadTargetReturnDelegateTestCase extends TargetReturnDelegateTestCase {
 
   @Override
   protected ReturnDelegate createReturnDelegate() {
-    return new PayloadTargetReturnDelegate(TARGET, componentModel, getCursorProviderFactory(), muleContext);
+    return new PayloadTargetReturnDelegate(TARGET, mock(Component.class), componentModel, getCursorProviderFactory(),
+                                           muleContext);
   }
 
   @Override
