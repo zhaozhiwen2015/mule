@@ -10,7 +10,11 @@ import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static java.lang.Thread.currentThread;
 import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.joining;
+import static org.slf4j.LoggerFactory.getLogger;
+
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
+import static org.mule.runtime.config.internal.util.Constants.ENABLE_ENTITY_RESOLVER_LOGGING;
 import static org.mule.runtime.core.api.util.IOUtils.closeQuietly;
 
 import org.mule.runtime.api.exception.MuleRuntimeException;
@@ -20,6 +24,7 @@ import org.mule.runtime.config.internal.DefaultXmlLoggerErrorHandler;
 import org.mule.runtime.config.internal.ModuleDelegatingEntityResolver;
 import org.mule.runtime.config.internal.MuleDocumentLoader;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.xml.DelegatingEntityResolver;
 import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
@@ -41,6 +46,8 @@ import java.util.Set;
  * @since 4.0
  */
 public final class XmlConfigurationDocumentLoader {
+
+  private static final Logger LOGGER = getLogger(XmlConfigurationDocumentLoader.class);
 
   /**
    * Indicates that XSD validation should be used (found no "DOCTYPE" declaration).
@@ -126,6 +133,14 @@ public final class XmlConfigurationDocumentLoader {
    * @see {@link DefaultXmlLoggerErrorHandler#getErrors()}
    */
   public Document loadDocument(Set<ExtensionModel> extensions, String filename, InputStream inputStream) {
+    if (ENABLE_ENTITY_RESOLVER_LOGGING) {
+      String extensionsNames = "empty or null";
+      if (extensions != null) {
+        extensionsNames = extensions.stream().map(ExtensionModel::getName).collect(joining(", "));
+      }
+
+      LOGGER.warn(format("Loading document: '%s' with extensions: '%s'", filename, extensionsNames));
+    }
     final XmlGathererErrorHandler errorHandler = createXmlGathererErrorHandler();
     Document document;
     try {

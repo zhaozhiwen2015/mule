@@ -6,9 +6,12 @@
  */
 package org.mule.runtime.module.extension.internal.capability.xml.schema;
 
+import static java.lang.String.format;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import static org.mule.runtime.api.util.Preconditions.checkArgument;
 import static org.mule.runtime.api.util.Preconditions.checkState;
+import static org.mule.runtime.config.internal.util.Constants.ENABLE_ENTITY_RESOLVER_LOGGING;
 import static org.mule.runtime.core.api.util.ClassUtils.withContextClassLoader;
 import static org.mule.runtime.internal.dsl.DslConstants.CORE_NAMESPACE;
 import static org.mule.runtime.internal.dsl.DslConstants.CORE_PREFIX;
@@ -35,6 +38,7 @@ import javax.xml.bind.Marshaller;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
+import org.slf4j.Logger;
 
 /**
  * Default {@link ExtensionSchemaGenerator} implementation.
@@ -45,6 +49,8 @@ import org.dom4j.io.XMLWriter;
  */
 public class DefaultExtensionSchemaGenerator implements ExtensionSchemaGenerator {
 
+  private static final Logger LOGGER = getLogger(DefaultExtensionSchemaGenerator.class);
+
   /**
    * {@inheritDoc}
    */
@@ -52,6 +58,11 @@ public class DefaultExtensionSchemaGenerator implements ExtensionSchemaGenerator
   public String generate(ExtensionModel extensionModel, DslResolvingContext dslContext) {
     XmlDslModel xmlDslModel = extensionModel.getXmlDslModel();
     validate(extensionModel, xmlDslModel);
+
+    if (ENABLE_ENTITY_RESOLVER_LOGGING) {
+      LOGGER
+          .warn(format("Generating extension model: '%s'-'%s'. ", xmlDslModel.getXsdFileName(), xmlDslModel.getSchemaVersion()));
+    }
 
     SchemaBuilder schemaBuilder = SchemaBuilder.newSchema(extensionModel, xmlDslModel, dslContext);
 
@@ -98,6 +109,11 @@ public class DefaultExtensionSchemaGenerator implements ExtensionSchemaGenerator
 
   private String renderSchema(Schema schema) {
     try {
+      if (ENABLE_ENTITY_RESOLVER_LOGGING) {
+        LOGGER.warn(format("Rendering schema: targetNamespace: '%s'",
+                           schema.getTargetNamespace() == null ? "" : schema.getTargetNamespace()));
+      }
+
       JAXBContext jaxbContext = JAXBContext.newInstance(Schema.class);
       Marshaller marshaller = jaxbContext.createMarshaller();
       NamespaceFilter outFilter = new NamespaceFilter(CORE_PREFIX, CORE_NAMESPACE, true);
