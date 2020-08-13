@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.module.extension.internal.runtime.resolver;
 
+import static java.util.Objects.hash;
 import static java.util.Optional.empty;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 
@@ -39,5 +40,23 @@ public final class StaticParameterResolver<T> implements ParameterResolver<T> {
   @Override
   public Optional<String> getExpression() {
     return empty();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof StaticParameterResolver))
+      return false;
+
+    StaticParameterResolver<?> other = (StaticParameterResolver<?>) o;
+
+    if (value == null)
+      return other.value == null;
+
+    return value.equals(other.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return hash(value);
   }
 }

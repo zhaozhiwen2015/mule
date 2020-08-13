@@ -109,7 +109,7 @@ class ExpressionBasedParameterResolver<T> implements ParameterResolver<T>, Initi
 
   @Override
   public boolean equals(Object o) {
-    if(!(o instanceof ExpressionBasedParameterResolver))
+    if (!(o instanceof ExpressionBasedParameterResolver))
       return false;
 
     ExpressionBasedParameterResolver<?> other = (ExpressionBasedParameterResolver<?>) o;
