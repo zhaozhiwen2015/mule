@@ -114,15 +114,9 @@ class ExpressionBasedParameterResolver<T> implements ParameterResolver<T>, Initi
 
     ExpressionBasedParameterResolver<?> other = (ExpressionBasedParameterResolver<?>) o;
 
-    boolean equals = other.expression.equals(expression)
+    return other.expression.equals(expression)
         && other.type.equals(type)
         && other.expectedDataType.equals(expectedDataType);
-
-    if(equals){
-      return equals;
-    }
-
-    return false;
   }
 
   @Override
