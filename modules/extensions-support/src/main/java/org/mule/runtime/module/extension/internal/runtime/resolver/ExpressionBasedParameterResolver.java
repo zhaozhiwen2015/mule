@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.module.extension.internal.runtime.resolver;
 
+import static java.util.Objects.hash;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.api.lifecycle.Initialisable;
@@ -16,6 +17,7 @@ import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.el.ExtendedExpressionManager;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -103,5 +105,28 @@ class ExpressionBasedParameterResolver<T> implements ParameterResolver<T>, Initi
 
   public void setMelAvailable(Boolean melAvailable) {
     this.melAvailable = melAvailable;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if(!(o instanceof ExpressionBasedParameterResolver))
+      return false;
+
+    ExpressionBasedParameterResolver<?> other = (ExpressionBasedParameterResolver<?>) o;
+
+    boolean equals = other.expression.equals(expression)
+        && other.type.equals(type)
+        && other.expectedDataType.equals(expectedDataType);
+
+    if(equals){
+      return equals;
+    }
+
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return hash(expression, type, expectedDataType);
   }
 }

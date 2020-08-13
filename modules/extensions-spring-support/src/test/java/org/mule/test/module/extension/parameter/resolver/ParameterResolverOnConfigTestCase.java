@@ -11,7 +11,7 @@ import static java.util.Optional.of;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import org.mule.runtime.extension.api.runtime.parameter.ParameterResolver;
 import org.mule.test.heisenberg.extension.model.KnockeableDoor;
 import org.mule.test.parameter.resolver.extension.extension.ParameterResolverConfig;
@@ -40,6 +40,14 @@ public class ParameterResolverOnConfigTestCase extends AbstractParameterResolver
     assertParameterResolver(doorResolver, of("#[app.registry.staticDoor]"), is(instanceOf(KnockeableDoor.class)));
     assertParameterResolver(stringResolver, of("#[payload]"), is("this is the payload"));
     assertThat(config.getLiteralDoor().getLiteralValue().get(), equalTo("#[aDoor]"));
+  }
+
+  @Test
+  public void configurationWithDynamicParameterResolversIsTheSamenstance() throws Exception {
+    ParameterResolverConfig config = getPayload("configurationWithDynamicParameterResolvers");
+    ParameterResolverConfig config2 = getPayload("configurationWithDynamicParameterResolvers");
+
+    assertThat("Parameter resolvers should return the same instance", config == config2);
   }
 
   @Test
