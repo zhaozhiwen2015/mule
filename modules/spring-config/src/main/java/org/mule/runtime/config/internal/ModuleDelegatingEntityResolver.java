@@ -98,13 +98,6 @@ public class ModuleDelegatingEntityResolver implements EntityResolver {
     LOGGER.warn(format("Looking schema for public identifier(publicId): '%s', system identifier(systemId): '%s'",
                        publicId == null ? "" : publicId, systemId));
 
-
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(format("Looking schema for public identifier(publicId): '%s', system identifier(systemId): '%s'",
-                          publicId == null ? "" : publicId,
-                          systemId));
-    }
-
     systemId = overrideSystemIdForCompatibility(publicId, systemId);
 
     InputSource inputSource;

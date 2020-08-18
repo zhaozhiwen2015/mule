@@ -50,7 +50,8 @@ public class MuleCustomEntityResolver implements EntityResolver {
         // The caller expects the stream in the InputSource to be open, so this cannot be closed before returning.
         InputStream is = this.classLoader.getResourceAsStream(resourceLocation);
         if (is == null) {
-          LOGGER.debug("Couldn't find XML schema [" + systemId + "]: " + resourceLocation);
+          LOGGER.warn("Couldn't find XML schema [" + systemId + "]: " + resourceLocation + " in classloader [" + this.classLoader
+              + "]");
           return null;
         }
         InputSource source = new InputSource(is);
@@ -75,9 +76,9 @@ public class MuleCustomEntityResolver implements EntityResolver {
     try {
       Properties mappings =
           loadAllProperties(CUSTOM_SCHEMA_MAPPINGS_LOCATION, this.classLoader);
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Loaded schema mappings: " + mappings);
-      }
+
+      LOGGER.warn("Loaded from classloader [" + this.classLoader + "] schema mappings: " + mappings);
+
       Map<String, String> schemaMappings = new HashMap<>(mappings.size());
       CollectionUtils.mergePropertiesIntoMap(mappings, schemaMappings);
       return schemaMappings;

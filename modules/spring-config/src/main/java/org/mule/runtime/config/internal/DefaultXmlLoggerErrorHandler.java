@@ -42,10 +42,10 @@ public class DefaultXmlLoggerErrorHandler implements XmlGathererErrorHandler {
   @Override
   public void warning(SAXParseException e) throws SAXException {
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug(format("Found a waring exception parsing document, message '%s'", e.toString()), e);
+      LOGGER.debug(format("Found a warning exception parsing document, message '%s'", e.toString()), e);
     }
 
-    LOGGER.warn(format("Found a waring exception parsing document, message '%s'", e.toString()), e);
+    LOGGER.warn(format("Found a warning exception parsing document, message '%s'", e.toString()), e);
   }
 
   @Override
