@@ -12,7 +12,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
-import static org.mule.runtime.config.internal.util.Constants.ENABLE_ENTITY_RESOLVER_LOGGING;
 
 import org.mule.runtime.api.dsl.DslResolvingContext;
 import org.mule.runtime.api.exception.MuleRuntimeException;
@@ -96,10 +95,9 @@ public class ModuleDelegatingEntityResolver implements EntityResolver {
 
   @Override
   public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-    if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-      LOGGER.warn(format("Looking schema for public identifier(publicId): '%s', system identifier(systemId): '%s'",
-                         publicId == null ? "" : publicId, systemId));
-    }
+    LOGGER.warn(format("Looking schema for public identifier(publicId): '%s', system identifier(systemId): '%s'",
+                       publicId == null ? "" : publicId, systemId));
+
 
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(format("Looking schema for public identifier(publicId): '%s', system identifier(systemId): '%s'",
@@ -112,43 +110,36 @@ public class ModuleDelegatingEntityResolver implements EntityResolver {
     InputSource inputSource;
     inputSource = muleEntityResolver.resolveEntity(publicId, systemId);
     if (inputSource == null) {
-      if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-        LOGGER.warn(format("Generating schema for public identifier(publicId): '%s', system identifier(systemId): '%s'",
-                           publicId == null ? "" : publicId, systemId));
-      }
+      LOGGER.warn(format("Generating schema for public identifier(publicId): '%s', system identifier(systemId): '%s'",
+                         publicId == null ? "" : publicId, systemId));
       inputSource = generateFromExtensions(publicId, systemId);
     }
     if (inputSource == null) {
       if (checkedEntities.get(systemId) != null) {
-        if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-          LOGGER.warn(format("Schema for public identifier(publicId): '%s', system identifier(systemId): '%s' not found",
-                             publicId == null ? "" : publicId, systemId));
-        }
+        LOGGER.warn(format("Schema for public identifier(publicId): '%s', system identifier(systemId): '%s' not found",
+                           publicId == null ? "" : publicId, systemId));
         String namespaceNotFound =
             publicId == null ? format("Can't resolve %s", systemId) : format("Can't resolve %s (%s)", publicId, systemId);
         String message = format("%s, A dependency or plugin might be missing", namespaceNotFound);
         throw new MuleRuntimeException(createStaticMessage(message));
       } else {
-        if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-          LOGGER
-              .warn(format("Schema for public identifier(publicId): '%s', system identifier(systemId): '%s' not found nor generated in this iteration",
-                           publicId == null ? "" : publicId, systemId));
-        }
+        LOGGER
+            .warn(format("Schema for public identifier(publicId): '%s', system identifier(systemId): '%s' not found nor generated in this iteration",
+                         publicId == null ? "" : publicId, systemId));
         checkedEntities.put(systemId, true);
       }
     }
 
-    if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-      if (inputSource == null) {
-        LOGGER.warn(format("Invalid input source (null) for public identifier(publicId): '%s', system identifier(systemId): '%s'",
-                           publicId == null ? "" : publicId, systemId));
-      }
-
-      if (inputSource != null && inputSource.getByteStream() == null) {
-        LOGGER.warn(format("Invalid byte stream (null) for public identifier(publicId): '%s', system identifier(systemId): '%s'",
-                           publicId == null ? "" : publicId, systemId));
-      }
+    if (inputSource == null) {
+      LOGGER.warn(format("Invalid input source (null) for public identifier(publicId): '%s', system identifier(systemId): '%s'",
+                         publicId == null ? "" : publicId, systemId));
     }
+
+    if (inputSource != null && inputSource.getByteStream() == null) {
+      LOGGER.warn(format("Invalid byte stream (null) for public identifier(publicId): '%s', system identifier(systemId): '%s'",
+                         publicId == null ? "" : publicId, systemId));
+    }
+
     return inputSource;
   }
 

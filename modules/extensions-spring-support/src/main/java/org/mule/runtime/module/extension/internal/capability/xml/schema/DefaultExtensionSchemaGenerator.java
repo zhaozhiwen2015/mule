@@ -11,7 +11,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import static org.mule.runtime.api.util.Preconditions.checkArgument;
 import static org.mule.runtime.api.util.Preconditions.checkState;
-import static org.mule.runtime.config.internal.util.Constants.ENABLE_ENTITY_RESOLVER_LOGGING;
 import static org.mule.runtime.core.api.util.ClassUtils.withContextClassLoader;
 import static org.mule.runtime.internal.dsl.DslConstants.CORE_NAMESPACE;
 import static org.mule.runtime.internal.dsl.DslConstants.CORE_PREFIX;
@@ -59,10 +58,8 @@ public class DefaultExtensionSchemaGenerator implements ExtensionSchemaGenerator
     XmlDslModel xmlDslModel = extensionModel.getXmlDslModel();
     validate(extensionModel, xmlDslModel);
 
-    if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-      LOGGER
-          .warn(format("Generating extension model: '%s'-'%s'. ", xmlDslModel.getXsdFileName(), xmlDslModel.getSchemaVersion()));
-    }
+    LOGGER
+        .warn(format("Generating extension model: '%s'-'%s'. ", xmlDslModel.getXsdFileName(), xmlDslModel.getSchemaVersion()));
 
     SchemaBuilder schemaBuilder = SchemaBuilder.newSchema(extensionModel, xmlDslModel, dslContext);
 
@@ -109,10 +106,8 @@ public class DefaultExtensionSchemaGenerator implements ExtensionSchemaGenerator
 
   private String renderSchema(Schema schema) {
     try {
-      if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-        LOGGER.warn(format("Rendering schema: targetNamespace: '%s'",
-                           schema.getTargetNamespace() == null ? "" : schema.getTargetNamespace()));
-      }
+      LOGGER.warn(format("Rendering schema: targetNamespace: '%s'",
+                         schema.getTargetNamespace() == null ? "" : schema.getTargetNamespace()));
 
       JAXBContext jaxbContext = JAXBContext.newInstance(Schema.class);
       Marshaller marshaller = jaxbContext.createMarshaller();

@@ -14,7 +14,6 @@ import static java.util.stream.Collectors.joining;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
-import static org.mule.runtime.config.internal.util.Constants.ENABLE_ENTITY_RESOLVER_LOGGING;
 import static org.mule.runtime.core.api.util.IOUtils.closeQuietly;
 
 import org.mule.runtime.api.exception.MuleRuntimeException;
@@ -133,14 +132,12 @@ public final class XmlConfigurationDocumentLoader {
    * @see {@link DefaultXmlLoggerErrorHandler#getErrors()}
    */
   public Document loadDocument(Set<ExtensionModel> extensions, String filename, InputStream inputStream) {
-    if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-      String extensionsNames = "empty or null";
-      if (extensions != null) {
-        extensionsNames = extensions.stream().map(ExtensionModel::getName).collect(joining(", "));
-      }
-
-      LOGGER.warn(format("Loading document: '%s' with extensions: '%s'", filename, extensionsNames));
+    String extensionsNames = "empty or null";
+    if (extensions != null) {
+      extensionsNames = extensions.stream().map(ExtensionModel::getName).collect(joining(", "));
     }
+
+    LOGGER.warn(format("Loading document: '%s' with extensions: '%s'", filename, extensionsNames));
     final XmlGathererErrorHandler errorHandler = createXmlGathererErrorHandler();
     Document document;
     try {

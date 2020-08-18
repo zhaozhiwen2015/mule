@@ -7,7 +7,6 @@
 package org.mule.runtime.config.internal;
 
 import static java.lang.String.format;
-import static org.mule.runtime.config.internal.util.Constants.ENABLE_ENTITY_RESOLVER_LOGGING;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +45,7 @@ public class DefaultXmlLoggerErrorHandler implements XmlGathererErrorHandler {
       LOGGER.debug(format("Found a waring exception parsing document, message '%s'", e.toString()), e);
     }
 
-    if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-      LOGGER.warn(format("Found a waring exception parsing document, message '%s'", e.toString()), e);
-    }
+    LOGGER.warn(format("Found a waring exception parsing document, message '%s'", e.toString()), e);
   }
 
   @Override
@@ -56,9 +53,8 @@ public class DefaultXmlLoggerErrorHandler implements XmlGathererErrorHandler {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(format("Found a fatal error exception parsing document, message '%s'", e.toString()), e);
     }
-    if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-      LOGGER.warn(format("Found a fatal error exception parsing document, message '%s'", e.toString()), e);
-    }
+
+    LOGGER.warn(format("Found a fatal error exception parsing document, message '%s'", e.toString()), e);
     throw e;
   }
 
@@ -67,10 +63,8 @@ public class DefaultXmlLoggerErrorHandler implements XmlGathererErrorHandler {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(format("Found error exception parsing document, message '%s'", e.toString()), e);
     }
-    if (ENABLE_ENTITY_RESOLVER_LOGGING) {
-      LOGGER.warn(format("Found error exception parsing document, message '%s'", e.toString()), e);
-    }
 
+    LOGGER.warn(format("Found error exception parsing document, message '%s'", e.toString()), e);
     errors.add(e);
   }
 
