@@ -181,17 +181,12 @@ abstract class AbstractEventContext implements BaseEventContext {
       if (debugLogEnabled) {
         LOGGER.debug("{} handling messaging exception.", this);
       }
-      return just((MessagingException) throwable)
-          .flatMapMany(exceptionHandler)
-          .doOnNext(handled -> success(handled))
-          .doOnError(rethrown -> responseDone(left(rethrown)))
-          // This ensures that both handled and rethrown outcome both result in a Publisher<Void>
-          .materialize().then()
-          .toProcessor();
+      exceptionHandler.routeError((MessagingException) throwable, handled -> success(handled),
+                                  rethrown -> responseDone(left(rethrown)));
     } else {
       responseDone(left(throwable));
-      return empty();
     }
+    return empty();
   }
 
   private synchronized void responseDone(Either<Throwable, CoreEvent> result) {

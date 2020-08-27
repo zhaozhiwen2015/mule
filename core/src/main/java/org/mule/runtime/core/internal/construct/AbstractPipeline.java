@@ -74,6 +74,7 @@ import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -151,6 +152,7 @@ public abstract class AbstractPipeline extends AbstractFlowConstruct implements 
       builder.setProcessingStrategy(processingStrategy);
     }
     configureMessageProcessors(builder);
+    builder.setMessagingExceptionHandler(getExceptionListener());
     return builder.build();
   }
 
@@ -248,15 +250,19 @@ public abstract class AbstractPipeline extends AbstractFlowConstruct implements 
         .flatMap(routeThroughProcessingStrategy())
         .subscriberContext(ctx -> ctx.delete("policy.nextOperation"))
         // This replaces the onErrorContinue key if it exists, to prevent it from being propagated within the flow
-        .compose(pub -> pub.subscriberContext(context -> {
-          Optional<Object> onErrorStrategy = context.getOrEmpty(KEY_ON_NEXT_ERROR_STRATEGY);
-          if (onErrorStrategy.isPresent()
-              && onErrorStrategy.get().toString().contains(ON_NEXT_FAILURE_STRATEGY)) {
-            BiFunction<Throwable, Object, Throwable> onErrorContinue = (e, o) -> null;
-            return context.put(KEY_ON_NEXT_ERROR_STRATEGY, onErrorContinue);
-          }
-          return context;
-        }));
+        .compose(clearSubscribersErrorStrategy());
+  }
+
+  private Function<Flux<CoreEvent>, Publisher<CoreEvent>> clearSubscribersErrorStrategy() {
+    return pub -> pub.subscriberContext(context -> {
+      Optional<Object> onErrorStrategy = context.getOrEmpty(KEY_ON_NEXT_ERROR_STRATEGY);
+      if (onErrorStrategy.isPresent()
+          && onErrorStrategy.get().toString().contains(ON_NEXT_FAILURE_STRATEGY)) {
+        BiFunction<Throwable, Object, Throwable> onErrorContinue = (e, o) -> null;
+        return context.put(KEY_ON_NEXT_ERROR_STRATEGY, onErrorContinue);
+      }
+      return context;
+    });
   }
 
   protected Function<CoreEvent, Publisher<? extends CoreEvent>> routeThroughProcessingStrategy() {

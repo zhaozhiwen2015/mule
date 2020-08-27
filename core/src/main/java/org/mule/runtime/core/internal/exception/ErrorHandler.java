@@ -33,6 +33,7 @@ import org.mule.runtime.core.privileged.exception.MessagingExceptionHandlerAccep
 import org.mule.runtime.core.privileged.exception.TemplateOnErrorHandler;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -55,6 +56,8 @@ public class ErrorHandler extends AbstractMuleObjectOwner<MessagingExceptionHand
   @Inject
   private NotificationDispatcher notificationDispatcher;
 
+  private MessagingExceptionResolver messagingExceptionResolver = new MessagingExceptionResolver(this);
+
   @Override
   public void initialise() throws InitialisationException {
     super.initialise();
@@ -62,6 +65,26 @@ public class ErrorHandler extends AbstractMuleObjectOwner<MessagingExceptionHand
     addCriticalErrorHandler();
     addDefaultErrorHandlerIfRequired();
     validateConfiguredExceptionStrategies();
+  }
+
+  @Override
+  public void routeError(Exception error, Consumer<CoreEvent> continueCallback,
+                         Consumer<Throwable> propagateCallback) {
+    MessagingException messagingError = (MessagingException) error;
+    CoreEvent event = messagingError.getEvent();
+    messagingError.setProcessedEvent(event);
+    try {
+      for (MessagingExceptionHandlerAcceptor errorListener : exceptionListeners) {
+        if (errorListener.accept(event)) {
+          errorListener.routeError(error, continueCallback, propagateCallback);
+          return;
+        }
+      }
+      throw new MuleRuntimeException(createStaticMessage(MUST_ACCEPT_ANY_EVENT_MESSAGE));
+    } catch (Exception e) {
+      propagateCallback.accept(messagingExceptionResolver.resolve(new MessagingException(event, e, this),
+                                                                  muleContext));
+    }
   }
 
   @Override
@@ -204,7 +227,8 @@ public class ErrorHandler extends AbstractMuleObjectOwner<MessagingExceptionHand
   public void setExceptionListenersLocation(Location flowLocation) {
     List<MessagingExceptionHandlerAcceptor> listeners =
         this.getExceptionListeners().stream().map(exceptionListener -> (exceptionListener instanceof TemplateOnErrorHandler)
-            ? ((TemplateOnErrorHandler) exceptionListener).duplicateFor(flowLocation) : exceptionListener).collect(toList());
+            ? ((TemplateOnErrorHandler) exceptionListener).duplicateFor(flowLocation)
+            : exceptionListener).collect(toList());
     this.setExceptionListeners(listeners);
   }
 
