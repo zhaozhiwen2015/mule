@@ -69,8 +69,9 @@ public class DefaultToolingService implements ToolingService {
 
   private static final String TOOLING_FOLDER = "tooling";
   private static final String TOOLING_APPS_FOLDER = "apps";
+  private static final String CLASS_LOADER_MODEL_FOLDER = "class-loader-model";
 
-  private static final String TOOLING_PREFIX = TOOLING_FOLDER;
+  static final String TOOLING_PREFIX = TOOLING_FOLDER;
   private static final String APPLICATION = "application";
   private static final String DOMAIN = "domain";
 
@@ -83,6 +84,8 @@ public class DefaultToolingService implements ToolingService {
   private final ToolingApplicationDescriptorFactory applicationDescriptorFactory;
 
   private File toolingServiceAppsFolder;
+  private File toolingClassLoaderModelFolder;
+
   private ArtifactFileWriter artifactFileWriter;
 
   /**
@@ -106,12 +109,13 @@ public class DefaultToolingService implements ToolingService {
    */
   @Override
   public ConnectivityTestingServiceBuilder newConnectivityTestingServiceBuilder() {
-    return new DefaultConnectivityTestingServiceBuilder(applicationFactory);
+    return new DefaultConnectivityTestingServiceBuilder(applicationFactory, toolingServiceAppsFolder,
+                                                        toolingClassLoaderModelFolder);
   }
 
   @Override
   public DeclarationSessionBuilder newDeclarationSessionBuilder() {
-    return new DefaultDeclarationSessionBuilder(applicationFactory);
+    return new DefaultDeclarationSessionBuilder(applicationFactory, toolingServiceAppsFolder, toolingClassLoaderModelFolder);
   }
 
   /**
@@ -282,18 +286,17 @@ public class DefaultToolingService implements ToolingService {
    */
   @Override
   public void initialise() throws InitialisationException {
-    toolingServiceAppsFolder = createToolingServiceAppsFolder();
+    createToolingServiceFolders();
     artifactFileWriter = new ArtifactFileWriter(toolingServiceAppsFolder);
   }
 
   /**
-   * Creates a folder for this service to upload tooling applications.
+   * Creates a folder for this service to upload tooling applications and cache resources.
    *
-   * @return {@link File} working folder.
-   * @throws InitialisationException if there was an error while creating the folder.
+   * @throws InitialisationException if there was an error while creating the folders.
    */
-  private File createToolingServiceAppsFolder() throws InitialisationException {
-    File toolingServiceAppsFolder = new File(getToolingWorkingDir(), TOOLING_APPS_FOLDER);
+  private void createToolingServiceFolders() throws InitialisationException {
+    this.toolingServiceAppsFolder = new File(getToolingWorkingDir(), TOOLING_APPS_FOLDER);
     if (!toolingServiceAppsFolder.exists()) {
       boolean folderCreated = toolingServiceAppsFolder.mkdirs();
       if (!folderCreated) {
@@ -312,7 +315,20 @@ public class DefaultToolingService implements ToolingService {
         logger.warn("Could not clean up tooling service resources folder at: " + toolingServiceAppsFolder);
       }
     }
-    return toolingServiceAppsFolder;
+
+    this.toolingClassLoaderModelFolder = new File(getToolingWorkingDir(), CLASS_LOADER_MODEL_FOLDER);
+    if (!toolingClassLoaderModelFolder.exists()) {
+      boolean folderCreated = toolingClassLoaderModelFolder.mkdirs();
+      if (!folderCreated) {
+        throw new InitialisationException(createStaticMessage("Couldn't start up the service"),
+                                          new IOException("Couldn't create tooling service class loader model cache resources folder: "
+                                              + toolingClassLoaderModelFolder),
+                                          this);
+      }
+      if (logger.isDebugEnabled()) {
+        logger.debug("Created tooling service class loader model cache resources folder at: " + toolingClassLoaderModelFolder);
+      }
+    }
   }
 
   private File getToolingWorkingDir() {

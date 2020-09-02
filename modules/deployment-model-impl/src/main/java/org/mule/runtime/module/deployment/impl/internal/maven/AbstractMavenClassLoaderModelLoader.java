@@ -29,7 +29,6 @@ import static org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescrip
 import static org.mule.runtime.module.artifact.api.descriptor.BundleScope.PROVIDED;
 import static org.mule.runtime.module.deployment.impl.internal.plugin.PluginLocalDependenciesBlacklist.isBlacklisted;
 import static org.mule.tools.api.classloader.ClassLoaderModelJsonSerializer.deserialize;
-
 import org.mule.maven.client.api.MavenClient;
 import org.mule.maven.client.api.MavenReactorResolver;
 import org.mule.runtime.api.deployment.meta.MuleArtifactLoaderDescriptor;
@@ -49,6 +48,9 @@ import org.mule.runtime.module.reboot.api.MuleContainerBootstrapUtils;
 import org.mule.tools.api.classloader.model.Artifact;
 import org.mule.tools.api.classloader.model.ArtifactCoordinates;
 
+import com.google.common.collect.ImmutableSet;
+import com.vdurmont.semver4j.Semver;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -64,8 +66,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.google.common.collect.ImmutableSet;
-import com.vdurmont.semver4j.Semver;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.InvalidVersionSpecificationException;
 import org.eclipse.aether.version.Version;
@@ -430,7 +430,7 @@ public abstract class AbstractMavenClassLoaderModelLoader implements ClassLoader
         loadUrls(artifactFile, classLoaderModelBuilder, nonProvidedDependencies, emptyList());
 
     if (!isBlacklisted(artifactBundleDescriptor)) {
-      populateLocalPackages(discoverLocalPackages(dependenciesArtifactsUrls), classLoaderModelBuilder);
+      //populateLocalPackages(discoverLocalPackages(dependenciesArtifactsUrls), classLoaderModelBuilder);
     }
 
     classLoaderModelBuilder.dependingOn(new HashSet<>(resolvedDependencies));

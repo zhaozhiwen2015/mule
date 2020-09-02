@@ -16,6 +16,7 @@ import org.mule.runtime.module.tooling.internal.ApplicationSupplier;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.io.File;
 import java.util.Map;
 
 public class DefaultDeclarationSessionBuilder
@@ -24,8 +25,9 @@ public class DefaultDeclarationSessionBuilder
 
   private static final String TRUE = "true";
 
-  public DefaultDeclarationSessionBuilder(DefaultApplicationFactory defaultApplicationFactory) {
-    super(defaultApplicationFactory);
+  public DefaultDeclarationSessionBuilder(DefaultApplicationFactory defaultApplicationFactory, File toolingServiceAppsFolder,
+                                          File toolingClassLoaderModelFolder) {
+    super(defaultApplicationFactory, toolingServiceAppsFolder, toolingClassLoaderModelFolder);
   }
 
   @Override

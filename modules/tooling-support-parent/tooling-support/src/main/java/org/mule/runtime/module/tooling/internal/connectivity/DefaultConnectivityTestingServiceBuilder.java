@@ -12,6 +12,8 @@ import org.mule.runtime.module.tooling.api.connectivity.ConnectivityTestingServi
 import org.mule.runtime.module.tooling.internal.AbstractArtifactAgnosticServiceBuilder;
 import org.mule.runtime.module.tooling.internal.ApplicationSupplier;
 
+import java.io.File;
+
 /**
  * Default implementation for {@code ConnectivityTestingServiceBuilder}.
  *
@@ -21,8 +23,9 @@ public class DefaultConnectivityTestingServiceBuilder
     extends AbstractArtifactAgnosticServiceBuilder<ConnectivityTestingServiceBuilder, ConnectivityTestingService>
     implements ConnectivityTestingServiceBuilder {
 
-  public DefaultConnectivityTestingServiceBuilder(DefaultApplicationFactory defaultApplicationFactory) {
-    super(defaultApplicationFactory);
+  public DefaultConnectivityTestingServiceBuilder(DefaultApplicationFactory defaultApplicationFactory,
+                                                  File toolingServiceAppsFolder, File toolingClassLoaderModelFolder) {
+    super(defaultApplicationFactory, toolingServiceAppsFolder, toolingClassLoaderModelFolder);
   }
 
   @Override
