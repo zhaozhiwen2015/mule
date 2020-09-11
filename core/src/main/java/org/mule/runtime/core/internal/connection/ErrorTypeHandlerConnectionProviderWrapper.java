@@ -65,7 +65,11 @@ public final class ErrorTypeHandlerConnectionProviderWrapper<C> extends Abstract
     } catch (ConnectionException e) {
       Throwable cause = e.getCause();
       throw getErrorType(cause)
-          .map(errorType -> new ConnectionException(e.getMessage(), cause, errorType))
+          .map(errorType -> {
+            ConnectionException errorTypedConnectionException = new ConnectionException(e.getMessage(), cause, errorType);
+            errorTypedConnectionException.addAllInfo(e.getInfo());
+            return errorTypedConnectionException;
+          })
           .orElse(e);
     }
   }
