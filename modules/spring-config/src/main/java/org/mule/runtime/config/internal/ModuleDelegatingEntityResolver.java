@@ -51,7 +51,6 @@ public class ModuleDelegatingEntityResolver implements EntityResolver {
   private static final String CORE_DEPRECATED_XSD = "http://www.mulesoft.org/schema/mule/core/current/mule-core-deprecated.xsd";
   private static final String COMPATIBILITY_XSD =
       "http://www.mulesoft.org/schema/mule/compatibility/current/mule-compatibility.xsd";
-  private static final String TEST_XSD = "http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd";
   private static final int MAX_RESOLUTION_FAILURE_THRESHOLD = 10;
 
   private static Boolean internalIsRunningTests;
@@ -137,12 +136,6 @@ public class ModuleDelegatingEntityResolver implements EntityResolver {
         return CORE_DEPRECATED_XSD;
       } else {
         return CORE_CURRENT_XSD;
-      }
-    } else if (systemId.equals(TEST_XSD)) {
-      boolean runningTests = isRunningTests();
-      if (!runningTests && generateFromExtensions(publicId, systemId) == null) {
-        String message = "Internal runtime mule-test.xsd can't be used in real applications";
-        throw new MuleRuntimeException(createStaticMessage(message));
       }
     } else if (systemId.contains("spring")) {
       systemId = systemId.replace("-current.xsd", ".xsd");

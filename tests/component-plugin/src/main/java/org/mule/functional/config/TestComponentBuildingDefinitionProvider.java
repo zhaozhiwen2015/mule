@@ -7,6 +7,7 @@
 package org.mule.functional.config;
 
 import static org.mule.functional.config.TestXmlNamespaceInfoProvider.TEST_NAMESPACE;
+import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.core.api.processor.ReactiveProcessor.ProcessingType.CPU_LITE;
 import static org.mule.runtime.dsl.api.component.AttributeDefinition.Builder.fromChildCollectionConfiguration;
 import static org.mule.runtime.dsl.api.component.AttributeDefinition.Builder.fromChildConfiguration;
@@ -38,6 +39,7 @@ import org.mule.functional.api.component.TestNonBlockingProcessor;
 import org.mule.functional.api.component.ThrowProcessor;
 import org.mule.functional.client.QueueWriterMessageProcessor;
 import org.mule.runtime.api.component.Component;
+import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.dsl.api.component.ComponentBuildingDefinition;
 import org.mule.runtime.dsl.api.component.ComponentBuildingDefinitionProvider;
 import org.mule.tck.core.lifecycle.LifecycleTrackerCheckProcessor;
@@ -52,6 +54,7 @@ import java.util.List;
  * @since 4.0
  */
 public class TestComponentBuildingDefinitionProvider implements ComponentBuildingDefinitionProvider {
+  private static Boolean IS_RUNNING_TESTS;
 
   private ComponentBuildingDefinition.Builder baseDefinition;
 
@@ -59,6 +62,10 @@ public class TestComponentBuildingDefinitionProvider implements ComponentBuildin
 
   @Override
   public void init() {
+    if (!isRunningTests()) {
+      String message = "Internal runtime mule-test.xsd can't be used in real applications";
+      throw new MuleRuntimeException(createStaticMessage(message));
+    }
     baseDefinition = new ComponentBuildingDefinition.Builder().withNamespace(TEST_NAMESPACE);
   }
 
@@ -250,4 +257,17 @@ public class TestComponentBuildingDefinitionProvider implements ComponentBuildin
 
   }
 
+  private boolean isRunningTests() {
+    if (IS_RUNNING_TESTS != null) {
+      return IS_RUNNING_TESTS;
+    }
+    for (StackTraceElement element : new Throwable().getStackTrace()) {
+      if (element.getClassName().startsWith("org.junit.runners.")) {
+        IS_RUNNING_TESTS = true;
+        return true;
+      }
+    }
+    IS_RUNNING_TESTS = false;
+    return false;
+  }
 }
