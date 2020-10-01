@@ -15,6 +15,8 @@ import org.mule.runtime.core.api.policy.Policy;
 import org.mule.runtime.core.api.policy.PolicyChain;
 import org.mule.runtime.core.api.processor.Processor;
 import org.mule.runtime.core.api.processor.ReactiveProcessor;
+import org.mule.runtime.core.internal.context.MuleContextWithRegistry;
+import org.mule.runtime.core.internal.registry.MuleRegistry;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -55,6 +57,8 @@ public class SourcePolicyProcessor implements ReactiveProcessor {
     this.policy = policy;
     this.nextProcessorRef = new WeakReference<>(nextProcessor);
     this.policyEventMapper = new PolicyEventMapper(policy.getPolicyId());
+    MuleRegistry registry = ((MuleContextWithRegistry) policy.getPolicyChain().getMuleContext()).getRegistry();
+    registry.lookupByType()
   }
 
   /**

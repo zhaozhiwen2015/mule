@@ -13,6 +13,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import org.mule.runtime.api.message.Message;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.core.api.event.CoreEvent;
+import org.mule.runtime.core.api.policy.PolicyIsolationTransformer;
 import org.mule.runtime.core.api.policy.SourcePolicyParametersTransformer;
 import org.mule.runtime.core.internal.exception.MessagingException;
 import org.mule.runtime.core.internal.message.InternalEvent;
@@ -31,13 +32,15 @@ public class PolicyEventMapper {
   private static final Logger LOGGER = getLogger(PolicyEventMapper.class);
 
   private final String policyId;
+  private final PolicyIsolationTransformer isolationTransformer;
 
   public PolicyEventMapper() {
-    this(null);
+    this(null, null);
   }
 
-  public PolicyEventMapper(String policyId) {
+  public PolicyEventMapper(String policyId, PolicyIsolationTransformer isolationTransformer) {
     this.policyId = policyId;
+    this.isolationTransformer = isolationTransformer;
   }
 
   /**
@@ -51,6 +54,7 @@ public class PolicyEventMapper {
 
     return InternalEvent
         .builder(event)
+        .message(isolationTransformer.desolate(event.getMessage()))
         .clearVariables()
         .build();
   }
@@ -185,6 +189,7 @@ public class PolicyEventMapper {
 
     return InternalEvent
         .builder(event)
+        .message(isolationTransformer.desolate(event.getMessage()))
         .variablesTyped(variables != null ? variables : emptyMap())
         .build();
   }
@@ -216,7 +221,7 @@ public class PolicyEventMapper {
               .orElseGet(flowResult::getMessage);
 
       return InternalEvent.builder(flowResult)
-          .message(message)
+          .message(isolationTransformer.isolate(message))
           .build();
     } catch (Exception e) {
       if (LOGGER.isWarnEnabled()) {
@@ -279,7 +284,7 @@ public class PolicyEventMapper {
 
     return InternalEvent
         .builder(event)
-        .message(propagate ? event.getMessage() : originalEvent.getMessage())
+        .message(isolationTransformer.isolate(propagate ? event.getMessage() : originalEvent.getMessage()))
         .variables(originalEvent.getVariables())
         .build();
   }

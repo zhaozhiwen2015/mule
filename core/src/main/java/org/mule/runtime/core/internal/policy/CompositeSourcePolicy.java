@@ -179,7 +179,7 @@ public class CompositeSourcePolicy
         .transform(flowExecutionProcessor)
         .map(flowExecutionResponse -> {
           try {
-            return new PolicyEventMapper().onFlowFinish(flowExecutionResponse, parametersTransformer);
+            return new PolicyEventMapper(isolationTransformer).onFlowFinish(flowExecutionResponse, parametersTransformer);
           } catch (MessagingException e) {
             throw propagateWrappingFatal(errorResolver.apply(e));
           }
