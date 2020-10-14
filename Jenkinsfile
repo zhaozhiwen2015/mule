@@ -9,6 +9,7 @@ Map pipelineParams = [ "upstreamProjects" : UPSTREAM_PROJECTS_LIST.join(','),
                       // Uncomment it after they are copied
                       // "mavenSettingsXmlId" : "mule-runtime-maven-settings-MuleSettings",
                        "mavenAdditionalArgs" : "-Djava.net.preferIPv4Stack=true",
+                       "jdkTool" : "adoptopenjdk-8",
                        "mavenCompileGoal" : "clean install -U -DskipTests -DskipITs -Dinvoker.skip=true -Darchetype.test.skip -Dmaven.javadoc.skip",
                        "projectType" : "Runtime" ]
 
