@@ -28,8 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @NoExtend
 public class AllStatistics {
 
-  private boolean isStatisticsEnabled = getBoolean(MULE_ENABLE_STATISTICS);
-  private boolean payloadStatisticsDisabled = valueOf((getProperty(MULE_DISABLE_PAYLOAD_STATISTICS, "true")));
+  private boolean isStatisticsEnabled = true;
+  private boolean payloadStatisticsDisabled = false;
 
   private long startTime;
   private final ApplicationStatistics appStats;
