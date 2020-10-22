@@ -8,8 +8,8 @@ package org.mule.runtime.module.extension.internal.runtime.source;
 
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.isLazyInitMode;
+import static org.mule.runtime.core.internal.event.NullEventFactory.getNullEvent;
 import static org.mule.runtime.extension.api.ExtensionConstants.SCHEDULING_STRATEGY_PARAMETER_NAME;
-import static org.mule.runtime.module.extension.api.util.MuleExtensionUtils.getInitialiserEvent;
 import static org.mule.runtime.module.extension.internal.util.IntrospectionUtils.injectComponentLocation;
 import static org.mule.runtime.module.extension.internal.util.IntrospectionUtils.injectDefaultEncoding;
 import static org.mule.runtime.module.extension.internal.util.IntrospectionUtils.injectRefName;
@@ -26,14 +26,14 @@ import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.runtime.core.privileged.event.BaseEventContext;
 import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.runtime.extension.api.runtime.config.ConfigurationInstance;
-import org.mule.runtime.extension.api.runtime.source.PollingSource;
-import org.mule.runtime.extension.api.runtime.source.Source;
 import org.mule.runtime.module.extension.internal.loader.ParameterGroupDescriptor;
 import org.mule.runtime.module.extension.internal.runtime.objectbuilder.ResolverSetBasedObjectBuilder;
 import org.mule.runtime.module.extension.internal.runtime.resolver.ResolverSet;
 import org.mule.runtime.module.extension.internal.runtime.resolver.ValueResolver;
 import org.mule.runtime.module.extension.internal.runtime.resolver.ValueResolvingContext;
 import org.mule.runtime.module.extension.internal.runtime.source.poll.PollingSourceWrapper;
+import org.mule.sdk.api.runtime.source.PollingSource;
+import org.mule.sdk.api.runtime.source.Source;
 
 import java.util.Optional;
 
@@ -122,7 +122,7 @@ public final class SourceConfigurer {
     CoreEvent initialiserEvent = null;
     ValueResolvingContext context = null;
     try {
-      initialiserEvent = getInitialiserEvent(muleContext);
+      initialiserEvent = getNullEvent(muleContext);
       context = ValueResolvingContext.builder(initialiserEvent, expressionManager).withConfig(config).build();
       Source configuredSource = builder.build(context);
 
