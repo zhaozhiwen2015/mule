@@ -269,6 +269,14 @@ class ComponentConfigurationBuilder<T> {
         Object value = valueExtractor.getValue();
         if (value != null) {
           managedMap.put(definition.getKey(), value);
+        } else {
+          // Try to find attribute definition as configuration parameter.
+          ValueExtractorAttributeDefinitionVisitor extractor = new ValueExtractorAttributeDefinitionVisitor();
+          extractor.onConfigurationParameter(definition.getKey(), null, empty());
+          value = extractor.getValue();
+          if (value != null) {
+            managedMap.put(definition.getKey(), value);
+          }
         }
       }
       valueConsumer.accept(managedMap);

@@ -60,4 +60,18 @@
         <modulejson:get-hardcoded-type1-as-json target="someVariable"/>
         <modulejson:check-street-is-avenue street="#[vars.someVariable.street_type]" target="checkingFromHardcodedType1WithVariables"/>
     </flow>
+    
+    <flow name="testJoinStringArray">
+        <modulejson:join-string-array array="#[['1', '2']]">
+        </modulejson:join-string-array>
+    </flow>
+
+    <flow name="testJoinStringArrayByObject">
+        <!-- <modulejson:join-string-array-by-object object="#[{ 'name': 'my-name', 'array': ['1', '2']}]" /> -->
+        <modulejson:join-string-array-by-object>
+            <modulejson:object>
+                <![CDATA[#[%dw 2.0 output application/json --- { 'name': 'my-name', 'array': ['1', '2']}]]]>
+            </modulejson:object>
+        </modulejson:join-string-array-by-object>
+    </flow>
 </mule>

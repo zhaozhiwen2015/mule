@@ -8,4 +8,12 @@
     <catalog name="Type2" format="application/json">
         <schema format="application/json+schema" location="./module-json-custom-types-type2-schema.json" />
     </catalog>
+    
+    <catalog name="TypeStringArray" format="application/json">
+        <schema format="application/json+schema" location="./module-json-custom-types-string-array-schema.json"/>
+    </catalog>
+
+    <catalog name="TypeStringArrayByObject" format="application/json">
+        <schema format="application/json+schema" location="./module-json-custom-types-string-array-by-object-schema.json"/>
+    </catalog>
 </catalogs>
