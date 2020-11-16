@@ -20,6 +20,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import org.mule.runtime.api.component.ComponentIdentifier;
 import org.mule.runtime.api.component.ConfigurationProperties;
+import org.mule.runtime.api.exception.ErrorTypeRepository;
 import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.api.meta.model.ExtensionModel;
@@ -288,4 +289,8 @@ public class ApplicationModel implements ArtifactAst {
     ast.updatePropertiesResolver(newPropertiesResolver);
   }
 
+  @Override
+  public ErrorTypeRepository getErrorTypeRepository() {
+    return ast.getErrorTypeRepository();
+  }
 }

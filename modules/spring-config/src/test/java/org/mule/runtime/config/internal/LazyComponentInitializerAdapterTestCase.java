@@ -8,7 +8,6 @@
 package org.mule.runtime.config.internal;
 
 import static java.lang.Thread.currentThread;
-import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -38,6 +37,7 @@ import org.mule.runtime.api.lifecycle.Startable;
 import org.mule.runtime.api.lifecycle.Stoppable;
 import org.mule.runtime.api.lock.LockFactory;
 import org.mule.runtime.api.meta.model.ExtensionModel;
+import org.mule.runtime.api.meta.model.XmlDslModel;
 import org.mule.runtime.app.declaration.api.ArtifactDeclaration;
 import org.mule.runtime.config.api.LazyComponentInitializer.ComponentLocationFilter;
 import org.mule.runtime.config.dsl.model.AbstractDslModelTestCase;
@@ -174,6 +174,13 @@ public class LazyComponentInitializerAdapterTestCase extends AbstractDslModelTes
   @Override
   protected void initializeExtensionMock(ExtensionModel extension) {
     when(extension.getName()).thenReturn(EXTENSION_NAME);
+    when(extension.getXmlDslModel()).thenReturn(XmlDslModel.builder()
+        .setXsdFileName("mule-mockns.xsd")
+        .setPrefix(NAMESPACE)
+        .setNamespace(NAMESPACE_URI)
+        .setSchemaLocation(SCHEMA_LOCATION)
+        .setSchemaVersion("4.0")
+        .build());
   }
 
   private ArtifactDeclaration getSimpleApp() {
