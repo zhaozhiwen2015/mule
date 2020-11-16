@@ -84,28 +84,13 @@
 
     <operation name="join-string-array">
         <parameters>
-            <parameter name="array" type="TypeStringArray" defaultValue="#[['a', 'b']]"/>
+            <parameter name="behaviourArray" type="TypeStringArray"/>
+            <parameter name="contentArray" type="TypeStringArray" role="CONTENT"/>
         </parameters>
         <body>
-            <mule:set-variable variableName="collected" value="" />
-            <mule:foreach collection="#[vars.array]">
-                <mule:set-variable variableName="collected" value="#[output application/java  --- vars.collected ++ '-' ++ payload]" />
-            </mule:foreach>
-            <mule:set-payload value="#[vars.collected]"/>
-        </body>
-        <output type="string"/>
-    </operation>
-    
-    <operation name="join-string-array-by-object">
-        <parameters>
-            <parameter name="object" type="TypeStringArrayByObject" role="CONTENT"/>
-        </parameters>
-        <body>
-            <mule:set-variable variableName="collected" value="#[vars.object.name]" />
-            <mule:foreach collection="#[vars.object.array]">
-                <mule:set-variable variableName="collected" value="#[output application/java --- vars.collected ++ '-' ++ payload]" />
-            </mule:foreach>
-            <mule:set-payload value="#[vars.collected]"/>
+            <mule:set-variable variableName="behaviourAsString" value="#[output application/java  --- vars.behaviourArray joinBy '-']" />
+            <mule:set-variable variableName="contentAsString" value="#[output application/java  --- vars.contentArray joinBy '-']" />
+            <mule:set-payload value="#[vars.behaviourAsString ++ '_' ++ vars.contentAsString]"/>
         </body>
         <output type="string"/>
     </operation>

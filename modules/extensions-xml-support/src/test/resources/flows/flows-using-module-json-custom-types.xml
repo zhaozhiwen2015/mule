@@ -62,16 +62,10 @@
     </flow>
     
     <flow name="testJoinStringArray">
-        <modulejson:join-string-array array="#[['1', '2']]">
+        <modulejson:join-string-array behaviourArray="#[['1', '2']]">
+            <modulejson:content-array>
+                <![CDATA[#[%dw 2.0 output application/json --- ['a', 'b']]]]>
+            </modulejson:content-array>
         </modulejson:join-string-array>
-    </flow>
-
-    <flow name="testJoinStringArrayByObject">
-        <!-- <modulejson:join-string-array-by-object object="#[{ 'name': 'my-name', 'array': ['1', '2']}]" /> -->
-        <modulejson:join-string-array-by-object>
-            <modulejson:object>
-                <![CDATA[#[%dw 2.0 output application/json --- { 'name': 'my-name', 'array': ['1', '2']}]]]>
-            </modulejson:object>
-        </modulejson:join-string-array-by-object>
     </flow>
 </mule>

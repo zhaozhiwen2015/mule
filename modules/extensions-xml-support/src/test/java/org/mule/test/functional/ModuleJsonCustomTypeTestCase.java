@@ -12,7 +12,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.core.Is.is;
 
-import org.junit.Ignore;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.core.api.event.CoreEvent;
 
@@ -41,56 +40,48 @@ public class ModuleJsonCustomTypeTestCase extends AbstractCeXmlExtensionMuleArti
   }
 
   @Test
-  @Ignore
   public void testSendingJsonType1FromMap() throws Exception {
     final CoreEvent muleEvent = flowRunner("testIsJsonType1FromPayloadFlow").withPayload(EXPECTED_TYPE_1).run();
     assertIsExpectedType(muleEvent);
   }
 
   @Test
-  @Ignore
   public void testSendingJsonType1FromExpression() throws Exception {
     final CoreEvent muleEvent = flowRunner("testIsJsonType1FromExpressionFlow").run();
     assertIsExpectedType(muleEvent);
   }
 
   @Test
-  @Ignore
   public void testSendingJsonType1ContentFromMap() throws Exception {
     final CoreEvent muleEvent = flowRunner("testIsJsonType1ContentFromPayloadFlow").withPayload(EXPECTED_TYPE_1).run();
     assertIsExpectedType(muleEvent);
   }
 
   @Test
-  @Ignore
   public void testSendingJsonType1ContentFromExpression() throws Exception {
     final CoreEvent muleEvent = flowRunner("testIsJsonType1ContentFromExpressionFlow").run();
     assertIsExpectedType(muleEvent);
   }
 
   @Test
-  @Ignore
   public void testSendingJsonType2FromMap() throws Exception {
     final CoreEvent muleEvent = flowRunner("testIsJsonType2FromPayloadFlow").withPayload(EXPECTED_TYPE_2).run();
     assertIsExpectedType(muleEvent);
   }
 
   @Test
-  @Ignore
   public void testSendingJsonType2FromExpression() throws Exception {
     final CoreEvent muleEvent = flowRunner("testIsJsonType2FromExpressionFlow").run();
     assertIsExpectedType(muleEvent);
   }
 
   @Test
-  @Ignore
   public void testHardcodedType1Flow() throws Exception {
     final CoreEvent muleEvent = flowRunner("testHardcodedType1Flow").run();
     assertIsJsonType1(muleEvent);
   }
 
   @Test
-  @Ignore
   public void testHardcodedType1AndExtractFieldsInVarsFlow() throws Exception {
     final CoreEvent muleEvent = flowRunner("testHardcodedType1AndExtractFieldsInVarsFlow").run();
     for (Map.Entry<String, Object> entry : EXPECTED_TYPE_1.entrySet()) {
@@ -99,14 +90,12 @@ public class ModuleJsonCustomTypeTestCase extends AbstractCeXmlExtensionMuleArti
   }
 
   @Test
-  @Ignore
   public void testCopyJsonType1FromExpressionFlow() throws Exception {
     final CoreEvent muleEvent = flowRunner("testCopyJsonType1FromExpressionFlow").run();
     assertIsJsonType1(muleEvent);
   }
 
   @Test
-  @Ignore
   public void testExtractingJsonResponseAndFeedingSimpleType() throws Exception {
     final CoreEvent muleEvent = flowRunner("testExtractingJsonResponseAndFeedingSimpleType").run();
     final Map<String, TypedValue<?>> variables = muleEvent.getVariables();
@@ -128,15 +117,7 @@ public class ModuleJsonCustomTypeTestCase extends AbstractCeXmlExtensionMuleArti
   public void testJoinStringArray() throws Exception {
     CoreEvent event = flowRunner("testJoinStringArray").run();
     String content = (String) event.getMessage().getPayload().getValue();
-    assertThat(content, equalTo("-1-2"));
-  }
-
-  @Test
-  @Ignore
-  public void testJoinStringArrayByObject() throws Exception {
-    CoreEvent event = flowRunner("testJoinStringArrayByObject").run();
-    String content = (String) event.getMessage().getPayload().getValue();
-    assertThat(content, equalTo("my-name-1-2"));
+    assertThat(content, equalTo("1-2_a-b"));
   }
 
   /**
