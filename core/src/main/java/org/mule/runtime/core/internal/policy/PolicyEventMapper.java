@@ -10,10 +10,10 @@ import static java.util.Collections.emptyMap;
 import static org.mule.runtime.core.internal.policy.OperationPolicyContext.from;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import org.mule.runtime.http.policy.api.PolicyIsolationTransformer;
 import org.mule.runtime.api.message.Message;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.core.api.event.CoreEvent;
-import org.mule.runtime.core.api.policy.PolicyIsolationTransformer;
 import org.mule.runtime.core.api.policy.SourcePolicyParametersTransformer;
 import org.mule.runtime.core.internal.exception.MessagingException;
 import org.mule.runtime.core.internal.message.InternalEvent;
@@ -36,6 +36,14 @@ public class PolicyEventMapper {
 
   public PolicyEventMapper() {
     this(null, null);
+  }
+
+  public PolicyEventMapper(PolicyIsolationTransformer isolationTransformer) {
+    this(null, isolationTransformer);
+  }
+
+  public PolicyEventMapper(String policyId) {
+    this(policyId, null);
   }
 
   public PolicyEventMapper(String policyId, PolicyIsolationTransformer isolationTransformer) {

@@ -10,6 +10,7 @@ import static org.mule.runtime.core.internal.policy.PolicyNextActionMessageProce
 import static org.mule.runtime.core.internal.policy.PolicyNextActionMessageProcessor.POLICY_NEXT_OPERATION;
 import static reactor.core.publisher.Flux.from;
 
+import org.mule.runtime.http.policy.api.PolicyIsolationTransformer;
 import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.runtime.core.api.policy.Policy;
 import org.mule.runtime.core.api.policy.PolicyChain;
@@ -17,6 +18,7 @@ import org.mule.runtime.core.api.processor.Processor;
 import org.mule.runtime.core.api.processor.ReactiveProcessor;
 import org.mule.runtime.core.internal.context.MuleContextWithRegistry;
 import org.mule.runtime.core.internal.registry.MuleRegistry;
+import org.mule.runtime.core.privileged.registry.RegistrationException;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -46,6 +48,8 @@ public class SourcePolicyProcessor implements ReactiveProcessor {
   private final Policy policy;
   private final Reference<ReactiveProcessor> nextProcessorRef;
   private final PolicyEventMapper policyEventMapper;
+  private final PolicyIsolationTransformer transformer;
+  private final PolicyTraceLogger policyTraceLogger = new PolicyTraceLogger();
 
   /**
    * Creates a new {@code DefaultSourcePolicy}.
@@ -56,9 +60,13 @@ public class SourcePolicyProcessor implements ReactiveProcessor {
   public SourcePolicyProcessor(Policy policy, ReactiveProcessor nextProcessor) {
     this.policy = policy;
     this.nextProcessorRef = new WeakReference<>(nextProcessor);
-    this.policyEventMapper = new PolicyEventMapper(policy.getPolicyId());
     MuleRegistry registry = ((MuleContextWithRegistry) policy.getPolicyChain().getMuleContext()).getRegistry();
-    registry.lookupByType()
+    try {
+      transformer = registry.lookupObject(PolicyIsolationTransformer.class);
+      this.policyEventMapper = new PolicyEventMapper(policy.getPolicyId(), transformer);
+    } catch (RegistrationException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -71,7 +79,10 @@ public class SourcePolicyProcessor implements ReactiveProcessor {
   public Publisher<CoreEvent> apply(Publisher<CoreEvent> publisher) {
     return from(publisher)
         .map(policyEventMapper::onSourcePolicyBegin)
+        .doOnNext(event -> policyTraceLogger.logSourcePolicyStart(policy, event))
         .transform(policy.getPolicyChain())
+        .doOnNext(event -> policyTraceLogger.logSourcePolicyEnd(policy, event))
+        .map(coreEvent -> CoreEvent.builder(coreEvent).message(transformer.isolate(coreEvent.getMessage())).build())
         .subscriberContext(ctx -> ctx
             .put(POLICY_NEXT_OPERATION, nextProcessorRef)
             .put(POLICY_IS_PROPAGATE_MESSAGE_TRANSFORMATIONS, policy.getPolicyChain().isPropagateMessageTransformations()));

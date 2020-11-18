@@ -23,6 +23,7 @@ import org.mule.runtime.deployment.model.api.policy.PolicyTemplate;
 import org.mule.runtime.deployment.model.api.policy.PolicyTemplateDescriptor;
 import org.mule.runtime.deployment.model.internal.plugin.PluginDependenciesResolver;
 import org.mule.runtime.module.artifact.api.Artifact;
+import org.mule.runtime.module.artifact.api.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.artifact.api.classloader.MuleDeployableArtifactClassLoader;
 import org.mule.runtime.module.deployment.impl.internal.plugin.DefaultArtifactPlugin;
 import org.mule.runtime.module.license.api.LicenseValidator;
@@ -74,19 +75,23 @@ public class DefaultPolicyTemplateFactory implements PolicyTemplateFactory {
       ownPolicyClassLoader = policyTemplateClassLoaderBuilderFactory.createArtifactClassLoaderBuilder()
           .addArtifactPluginDescriptors(ownResolvedPluginDescriptors
               .toArray(new ArtifactPluginDescriptor[ownResolvedPluginDescriptors.size()]))
-          .setParentClassLoader(application.getRegionClassLoader()).setArtifactDescriptor(descriptor).build();
+          .setParentClassLoader(
+                                (ArtifactClassLoader) application.getRegionClassLoader().getParent().getParent())
+          .setArtifactDescriptor(descriptor).build();
 
       // This classloader needs to be created after ownPolicyClassLoader so its inner classloaders override the entries in the
       // ClassLoaderRepository for the application
       policyClassLoader = policyTemplateClassLoaderBuilderFactory.createArtifactClassLoaderBuilder()
           .addArtifactPluginDescriptors(resolvedPolicyPluginsDescriptors
               .toArray(new ArtifactPluginDescriptor[resolvedPolicyPluginsDescriptors.size()]))
-          .setParentClassLoader(application.getRegionClassLoader()).setArtifactDescriptor(descriptor).build();
+          .setParentClassLoader(
+                                (ArtifactClassLoader) application.getRegionClassLoader().getParent().getParent())
+          .setArtifactDescriptor(descriptor).build();
     } catch (IOException e) {
       throw new PolicyTemplateCreationException(createPolicyTemplateCreationErrorMessage(descriptor.getName()), e);
     }
 
-    application.getRegionClassLoader().addClassLoader(policyClassLoader, NULL_CLASSLOADER_FILTER);
+    // application.getRegionClassLoader().addClassLoader(policyClassLoader, NULL_CLASSLOADER_FILTER);
 
     List<ArtifactPlugin> artifactPlugins = createArtifactPluginList(policyClassLoader, resolvedPolicyPluginsDescriptors);
 
@@ -125,8 +130,8 @@ public class DefaultPolicyTemplateFactory implements PolicyTemplateFactory {
   private List<ArtifactPluginDescriptor> resolvePolicyPluginDescriptors(Application application,
                                                                         PolicyTemplateDescriptor descriptor) {
     LinkedList<ArtifactPlugin> providedArtifactPlugins = new LinkedList<>();
-    providedArtifactPlugins.addAll(application.getArtifactPlugins());
-    providedArtifactPlugins.addAll(application.getDomain().getArtifactPlugins());
+    //    providedArtifactPlugins.addAll(application.getArtifactPlugins());
+    //    providedArtifactPlugins.addAll(application.getDomain().getArtifactPlugins());
 
     Set<ArtifactPluginDescriptor> providedArtifactPluginsDescriptors =
         providedArtifactPlugins.stream().map(Artifact::getDescriptor).collect(toSet());

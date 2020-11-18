@@ -16,6 +16,7 @@ import static org.mule.runtime.core.privileged.processor.MessageProcessors.proce
 import static reactor.core.publisher.Flux.from;
 import static reactor.core.publisher.Mono.subscriberContext;
 
+import org.mule.runtime.http.policy.api.PolicyIsolationTransformer;
 import org.mule.runtime.api.component.AbstractComponent;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.exception.MuleException;
@@ -28,8 +29,10 @@ import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.runtime.core.api.exception.BaseExceptionHandler;
 import org.mule.runtime.core.api.processor.Processor;
 import org.mule.runtime.core.api.processor.ReactiveProcessor;
+import org.mule.runtime.core.internal.context.MuleContextWithRegistry;
 import org.mule.runtime.core.internal.context.notification.DefaultFlowCallStack;
 import org.mule.runtime.core.privileged.processor.chain.MessageProcessorChain;
+import org.mule.runtime.core.privileged.registry.RegistrationException;
 
 import java.lang.ref.Reference;
 import java.util.function.Consumer;
@@ -74,7 +77,14 @@ public class PolicyNextActionMessageProcessor extends AbstractComponent implemen
 
   @Override
   public void initialise() throws InitialisationException {
-    this.policyEventMapper = new PolicyEventMapper(getPolicyId());
+    try {
+      PolicyIsolationTransformer transformer =
+          ((MuleContextWithRegistry) muleContext).getRegistry().lookupObject(PolicyIsolationTransformer.class);
+      this.policyEventMapper = new PolicyEventMapper(getPolicyId(), transformer);
+    } catch (RegistrationException e) {
+      throw new RuntimeException(e);
+    }
+
     this.notificationHelper = new PolicyNotificationHelper(notificationManager, getPolicyId(), this);
 
     this.onExecuteNextErrorConsumer = errorConsumer(this.policyEventMapper, this.notificationHelper);

@@ -28,7 +28,6 @@ import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.stopIfNeeded;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
 import static org.mule.tck.probe.PollingProber.DEFAULT_POLLING_INTERVAL;
 
-import io.qameta.allure.Issue;
 import org.mule.runtime.api.component.Component;
 import org.mule.runtime.api.component.execution.CompletableCallback;
 import org.mule.runtime.api.component.location.ComponentLocation;
@@ -42,9 +41,6 @@ import org.mule.runtime.core.api.policy.OperationPolicyParametersTransformer;
 import org.mule.runtime.core.api.policy.Policy;
 import org.mule.runtime.core.api.policy.PolicyChain;
 import org.mule.runtime.core.api.policy.PolicyProvider;
-import org.mule.runtime.core.api.policy.SourcePolicyParametersTransformer;
-import org.mule.runtime.core.api.processor.ReactiveProcessor;
-import org.mule.runtime.core.internal.exception.MessagingException;
 import org.mule.runtime.core.internal.message.EventInternalContext;
 import org.mule.runtime.core.internal.message.InternalEvent;
 import org.mule.runtime.extension.api.runtime.operation.CompletableComponentExecutor.ExecutorCallback;
@@ -58,8 +54,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
+import io.qameta.allure.Issue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -286,24 +282,25 @@ public class DefaultPolicyManagerTestCase extends AbstractMuleContextTestCase {
 
     AtomicBoolean sourcePolicydisposed = new AtomicBoolean(false);
 
-    policyManager.setCompositePolicyFactory(new CompositePolicyFactory() {
-
-      @Override
-      public SourcePolicy createSourcePolicy(List<Policy> innerKey, ReactiveProcessor flowExecutionProcessor,
-                                             Optional<SourcePolicyParametersTransformer> lookupSourceParametersTransformer,
-                                             SourcePolicyProcessorFactory sourcePolicyProcessorFactory,
-                                             Function<MessagingException, MessagingException> resolver) {
-        final SourcePolicy sourcePolicy =
-            super.createSourcePolicy(innerKey, flowExecutionProcessor, lookupSourceParametersTransformer,
-                                     sourcePolicyProcessorFactory, resolver);
-        final Disposable deferredDispose = ((DeferredDisposable) sourcePolicy).deferredDispose();
-
-        return new DisposeListenerSourcePolicy(sourcePolicy, () -> {
-          deferredDispose.dispose();
-          sourcePolicydisposed.set(true);
-        });
-      }
-    });
+    //    policyManager.setCompositePolicyFactory(new CompositePolicyFactory() {
+    //
+    //      @Override
+    //      public SourcePolicy createSourcePolicy(List<Policy> innerKey, ReactiveProcessor flowExecutionProcessor,
+    //                                             Optional<SourcePolicyParametersTransformer> lookupSourceParametersTransformer,
+    //                                             SourcePolicyProcessorFactory sourcePolicyProcessorFactory,
+    //                                             Function<MessagingException, MessagingException> resolver,
+    //                                             PolicyIsolationTransformer transformer) {
+    //        final SourcePolicy sourcePolicy =
+    //            super.createSourcePolicy(innerKey, flowExecutionProcessor, lookupSourceParametersTransformer,
+    //                                     sourcePolicyProcessorFactory, resolver, null);
+    //        final Disposable deferredDispose = ((DeferredDisposable) sourcePolicy).deferredDispose();
+    //
+    //        return new DisposeListenerSourcePolicy(sourcePolicy, () -> {
+    //          deferredDispose.dispose();
+    //          sourcePolicydisposed.set(true);
+    //        });
+    //      }
+    //    });
 
     final Policy policy = mockPolicy();
 

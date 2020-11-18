@@ -16,6 +16,7 @@ import static org.mule.runtime.core.internal.policy.SourcePolicyContext.from;
 import static org.slf4j.LoggerFactory.getLogger;
 import static reactor.core.publisher.Flux.from;
 
+import org.mule.runtime.http.policy.api.PolicyIsolationTransformer;
 import org.mule.runtime.api.component.execution.CompletableCallback;
 import org.mule.runtime.api.functional.Either;
 import org.mule.runtime.api.lifecycle.Disposable;
@@ -58,6 +59,7 @@ public class CompositeSourcePolicy
   private final ReactiveProcessor flowExecutionProcessor;
   private final Optional<Function<MessagingException, MessagingException>> resolver;
   private final PolicyTraceLogger policyTraceLogger = new PolicyTraceLogger();
+  private final PolicyIsolationTransformer appIsolationTransformer;
 
   /**
    * Creates a new source policy composed by several {@link Policy} that will be chain together.
@@ -73,12 +75,23 @@ public class CompositeSourcePolicy
                                Optional<SourcePolicyParametersTransformer> sourcePolicyParametersTransformer,
                                SourcePolicyProcessorFactory sourcePolicyProcessorFactory,
                                Function<MessagingException, MessagingException> resolver) {
+    this(parameterizedPolicies, flowExecutionProcessor, sourcePolicyParametersTransformer, sourcePolicyProcessorFactory, resolver,
+         null);
+  }
+
+  public CompositeSourcePolicy(List<Policy> parameterizedPolicies,
+                               ReactiveProcessor flowExecutionProcessor,
+                               Optional<SourcePolicyParametersTransformer> sourcePolicyParametersTransformer,
+                               SourcePolicyProcessorFactory sourcePolicyProcessorFactory,
+                               Function<MessagingException, MessagingException> resolver,
+                               PolicyIsolationTransformer transformer) {
     super(parameterizedPolicies, sourcePolicyParametersTransformer);
     this.flowExecutionProcessor = flowExecutionProcessor;
     this.sourcePolicyProcessorFactory = sourcePolicyProcessorFactory;
     this.resolver = ofNullable(resolver);
     initProcessor();
-    this.commonPolicy = new CommonSourcePolicy(new SourceWithPoliciesFluxObjectFactory(this));
+    this.commonPolicy = new CommonSourcePolicy(new SourceWithPoliciesFluxObjectFactory(this, transformer));
+    this.appIsolationTransformer = transformer;
   }
 
   @Override
@@ -90,11 +103,14 @@ public class CompositeSourcePolicy
 
     private final Reference<CompositeSourcePolicy> compositeSourcePolicy;
     private final PolicyTraceLogger policyTraceLogger = new PolicyTraceLogger();
+    private final PolicyIsolationTransformer transformer;
 
-    public SourceWithPoliciesFluxObjectFactory(CompositeSourcePolicy compositeSourcePolicy) {
+    public SourceWithPoliciesFluxObjectFactory(CompositeSourcePolicy compositeSourcePolicy,
+                                               PolicyIsolationTransformer transformer) {
       // Avoid instances of this class from preventing the policy from being gc'd
       // Break the circular reference between policy-sinkFactory-flux that may cause memory leaks in the policies caches
       this.compositeSourcePolicy = new WeakReference<>(compositeSourcePolicy);
+      this.transformer = transformer;
     }
 
     @Override
@@ -105,6 +121,10 @@ public class CompositeSourcePolicy
           sinkRef.flux()
               .transform(compositeSourcePolicy.get().getExecutionProcessor())
               .map(policiesResultEvent -> {
+
+                Message desolated = transformer.desolate(policiesResultEvent.getMessage());
+                policiesResultEvent = CoreEvent.builder(policiesResultEvent).message(desolated).build();
+
                 SourcePolicyContext ctx = from(policiesResultEvent);
                 return right(SourcePolicyFailureResult.class,
                              new SourcePolicySuccessResult(policiesResultEvent,
@@ -176,10 +196,14 @@ public class CompositeSourcePolicy
 
     return from(eventPub)
         .doOnNext(e -> SourcePolicyContext.from(e).setParametersTransformer(parametersTransformer))
+        .map(coreEvent -> {
+          Message message = appIsolationTransformer.desolate(coreEvent.getMessage());
+          return CoreEvent.builder(coreEvent).message(message).build();
+        })
         .transform(flowExecutionProcessor)
         .map(flowExecutionResponse -> {
           try {
-            return new PolicyEventMapper(isolationTransformer).onFlowFinish(flowExecutionResponse, parametersTransformer);
+            return new PolicyEventMapper(appIsolationTransformer).onFlowFinish(flowExecutionResponse, parametersTransformer);
           } catch (MessagingException e) {
             throw propagateWrappingFatal(errorResolver.apply(e));
           }
@@ -194,9 +218,8 @@ public class CompositeSourcePolicy
   protected Publisher<CoreEvent> applyPolicy(Policy policy, ReactiveProcessor nextProcessor, Publisher<CoreEvent> eventPub) {
     final ReactiveProcessor createSourcePolicy = sourcePolicyProcessorFactory.createSourcePolicy(policy, nextProcessor);
     return from(eventPub)
-        .doOnNext(event -> policyTraceLogger.logSourcePolicyStart(policy, event))
-        .transform(createSourcePolicy)
-        .doOnNext(event -> policyTraceLogger.logSourcePolicyEnd(policy, event));
+
+        .transform(createSourcePolicy);
   }
 
   /**
@@ -212,7 +235,11 @@ public class CompositeSourcePolicy
   public void process(CoreEvent sourceEvent,
                       MessageSourceResponseParametersProcessor respParamProcessor,
                       CompletableCallback<Either<SourcePolicyFailureResult, SourcePolicySuccessResult>> callback) {
-    commonPolicy.process(sourceEvent, respParamProcessor, callback);
+    Message message = appIsolationTransformer.isolate(sourceEvent.getMessage());
+
+    CoreEvent newEvent = CoreEvent.builder(sourceEvent).message(message).build();
+
+    commonPolicy.process(newEvent, respParamProcessor, callback);
   }
 
   private static Map<String, Object> concatMaps(Map<String, Object> originalResponseParameters,

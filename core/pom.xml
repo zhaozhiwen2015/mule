@@ -92,6 +92,7 @@
         <dependency>
             <groupId>org.mule.runtime</groupId>
             <artifactId>mule-module-http-policy-api</artifactId>
+            <version>1.4.0-AGW-4485-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.mule.runtime</groupId>

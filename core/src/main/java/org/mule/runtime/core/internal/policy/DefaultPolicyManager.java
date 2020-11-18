@@ -14,6 +14,7 @@ import static org.mule.runtime.api.util.MuleSystemProperties.MULE_LIFECYCLE_FAIL
 import static org.mule.runtime.core.api.config.bootstrap.ArtifactType.APP;
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.disposeIfNeeded;
 
+import org.mule.runtime.http.policy.api.PolicyIsolationTransformer;
 import org.mule.runtime.api.artifact.Registry;
 import org.mule.runtime.api.component.Component;
 import org.mule.runtime.api.component.ComponentIdentifier;
@@ -207,7 +208,8 @@ public class DefaultPolicyManager implements PolicyManager, Lifecycle {
                                                                sourcePolicyProcessorFactory,
                                                                exception -> new MessagingExceptionResolver(source)
                                                                    .resolve(exception, errorTypeLocator,
-                                                                            exceptionContextProviders))));
+                                                                            exceptionContextProviders),
+                                                               lookupTransformer())));
 
       activePolicies.add(new DeferredDisposableWeakReference((DeferredDisposable) sourcePolicy, stalePoliciesQueue));
 
@@ -278,6 +280,10 @@ public class DefaultPolicyManager implements PolicyManager, Lifecycle {
     } finally {
       cacheInvalidateLock.readLock().unlock();
     }
+  }
+
+  private PolicyIsolationTransformer lookupTransformer() {
+    return registry.lookupByType(PolicyIsolationTransformer.class).get();
   }
 
   private Optional<OperationPolicyParametersTransformer> lookupOperationParametersTransformer(ComponentIdentifier componentIdentifier) {

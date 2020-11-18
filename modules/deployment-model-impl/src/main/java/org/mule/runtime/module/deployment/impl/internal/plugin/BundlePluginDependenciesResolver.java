@@ -94,10 +94,10 @@ public class BundlePluginDependenciesResolver implements PluginDependenciesResol
       } else {
         BundleDescriptor foundPluginBundleDescriptor = pluginDescriptor.get().getBundleDescriptor();
         // TODO MULE-15842: remove hardcoded HTTP artifact GAs.
-        if ((isDomain || (foundPluginBundleDescriptor.getArtifactId().equals(MULE_HTTP_CONNECTOR_ARTIFACT_ID) &&
-            foundPluginBundleDescriptor.getGroupId().equals(MULE_HTTP_CONNECTOR_GROUP_ID)))
-            && !isCompatibleVersion(foundPluginBundleDescriptor.getVersion(),
-                                    appPluginDescriptor.getBundleDescriptor().getVersion())) {
+        //        if ((isDomain || (foundPluginBundleDescriptor.getArtifactId().equals(MULE_HTTP_CONNECTOR_ARTIFACT_ID) &&
+        //            foundPluginBundleDescriptor.getGroupId().equals(MULE_HTTP_CONNECTOR_GROUP_ID)))
+        if (isDomain && !isCompatibleVersion(foundPluginBundleDescriptor.getVersion(),
+                                             appPluginDescriptor.getBundleDescriptor().getVersion())) {
           throw new IllegalStateException(
                                           format("Incompatible version of plugin '%s' (%s:%s) found. Artifact requires version '%s' but context provides version '%s'",
                                                  appPluginDescriptor.getName(),

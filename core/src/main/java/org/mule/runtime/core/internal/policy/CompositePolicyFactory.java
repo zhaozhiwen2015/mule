@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.core.internal.policy;
 
+import org.mule.runtime.http.policy.api.PolicyIsolationTransformer;
 import org.mule.runtime.api.component.Component;
 import org.mule.runtime.api.scheduler.Scheduler;
 import org.mule.runtime.core.api.policy.OperationPolicyParametersTransformer;
@@ -23,10 +24,11 @@ class CompositePolicyFactory {
   public SourcePolicy createSourcePolicy(List<Policy> innerKey, ReactiveProcessor flowExecutionProcessor,
                                          Optional<SourcePolicyParametersTransformer> lookupSourceParametersTransformer,
                                          SourcePolicyProcessorFactory sourcePolicyProcessorFactory,
-                                         Function<MessagingException, MessagingException> resolver) {
+                                         Function<MessagingException, MessagingException> resolver,
+                                         PolicyIsolationTransformer transformer) {
     return new CompositeSourcePolicy(innerKey, flowExecutionProcessor,
                                      lookupSourceParametersTransformer,
-                                     sourcePolicyProcessorFactory, resolver);
+                                     sourcePolicyProcessorFactory, resolver, transformer);
   }
 
   public OperationPolicy createOperationPolicy(Component operation, List<Policy> innerKey,
