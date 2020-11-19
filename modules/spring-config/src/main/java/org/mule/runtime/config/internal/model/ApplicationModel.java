@@ -290,6 +290,11 @@ public class ApplicationModel implements ArtifactAst {
   }
 
   @Override
+  public Set<ExtensionModel> getExtensionModels() {
+    return ast.getExtensionModels();
+  }
+
+  @Override
   public ErrorTypeRepository getErrorTypeRepository() {
     return ast.getErrorTypeRepository();
   }
