@@ -10,7 +10,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mule.api.config.MuleProperties.MULE_FORCE_REDELIVERY;
 
-import org.junit.After;
 import org.junit.ClassRule;
 import org.mule.api.MuleMessage;
 import org.mule.api.client.LocalMuleClient;
@@ -36,7 +35,7 @@ public class RollbackExceptionStrategyRedeliveryCountTestCase extends Functional
     }
 
     @ClassRule
-    public SystemProperty systemProperty = new SystemProperty(MULE_FORCE_REDELIVERY, "false");
+    public static SystemProperty systemProperty = new SystemProperty(MULE_FORCE_REDELIVERY, "true");
 
     @Test
     public void testRollbackExceptionStrategyNumberOfRetries() throws Exception
