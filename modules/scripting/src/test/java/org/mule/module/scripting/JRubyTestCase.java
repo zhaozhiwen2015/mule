@@ -6,7 +6,7 @@
  */
 package org.mule.module.scripting;
 
-import org.junit.Rule;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.mule.api.MuleEvent;
 import org.mule.tck.junit4.FunctionalTestCase;
@@ -23,7 +23,7 @@ public class JRubyTestCase extends FunctionalTestCase
         return "jruby-config.xml";
     }
 
-    @Rule
+    @ClassRule
     public SystemProperty jRubyGlobalVar =
             new SystemProperty("org.jruby.embed.localvariable.behavior", "global");
 
