@@ -24,7 +24,7 @@ public class JRubyTestCase extends FunctionalTestCase
     }
 
     @ClassRule
-    public SystemProperty jRubyGlobalVar =
+    public static SystemProperty jRubyGlobalVar =
             new SystemProperty("org.jruby.embed.localvariable.behavior", "global");
 
 
