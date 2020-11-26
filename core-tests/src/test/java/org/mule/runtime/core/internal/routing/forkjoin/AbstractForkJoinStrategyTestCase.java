@@ -60,6 +60,7 @@ import org.mule.runtime.core.privileged.processor.chain.MessageProcessorChain;
 import org.mule.runtime.core.privileged.routing.CompositeRoutingException;
 import org.mule.runtime.core.privileged.routing.RoutingResult;
 import org.mule.tck.junit4.AbstractMuleContextTestCase;
+import org.mule.tck.junit4.FlakyTest;
 import org.mule.tck.testmodels.fruit.Apple;
 
 import java.util.List;
@@ -112,6 +113,7 @@ public abstract class AbstractForkJoinStrategyTestCase extends AbstractMuleConte
 
   @Test
   @Description("When a route timeout occurs a CompositeRoutingException is thrown with details of timeout error in RoutingResult.")
+  @FlakyTest(times = 500)
   public void timeout() throws Throwable {
     strategy = createStrategy(processingStrategy, 1, true, 50);
 

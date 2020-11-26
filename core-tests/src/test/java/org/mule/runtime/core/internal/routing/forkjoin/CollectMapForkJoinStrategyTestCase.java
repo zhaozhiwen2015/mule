@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import org.junit.runner.RunWith;
 import org.mule.runtime.api.message.Message;
 import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.runtime.core.api.processor.strategy.ProcessingStrategy;
@@ -26,8 +27,10 @@ import org.mule.runtime.core.internal.routing.ForkJoinStrategy.RoutingPair;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Story;
+import org.mule.tck.junit4.FlakinessDetectorTestRunner;
 
 @Story(COLLECT_MAP)
+@RunWith(FlakinessDetectorTestRunner.class)
 public class CollectMapForkJoinStrategyTestCase extends AbstractForkJoinStrategyTestCase {
 
 
