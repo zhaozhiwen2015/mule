@@ -35,7 +35,7 @@ public class RollbackExceptionStrategyRedeliveryCountTestCase extends Functional
     }
 
     @ClassRule
-    public static SystemProperty systemProperty = new SystemProperty(MULE_FORCE_REDELIVERY, "true");
+    public static SystemProperty muleForceRedelivery = new SystemProperty(MULE_FORCE_REDELIVERY, "true");
 
     @Test
     public void testRollbackExceptionStrategyNumberOfRetries() throws Exception
