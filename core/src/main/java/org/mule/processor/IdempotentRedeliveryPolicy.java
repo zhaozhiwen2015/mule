@@ -50,7 +50,7 @@ public class IdempotentRedeliveryPolicy extends AbstractRedeliveryPolicy
 {
     private final ObjectToByteArray objectToByteArray = new ObjectToByteArray();
     private final ByteArrayToHexString byteArrayToHexString = new ByteArrayToHexString();
-    private static final boolean FORCE_REDELIVERY = getBoolean(MULE_FORCE_REDELIVERY);
+    private final boolean FORCE_REDELIVERY = getBoolean(MULE_FORCE_REDELIVERY);
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
