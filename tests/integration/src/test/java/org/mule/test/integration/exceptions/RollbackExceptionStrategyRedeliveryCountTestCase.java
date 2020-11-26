@@ -53,7 +53,7 @@ public class RollbackExceptionStrategyRedeliveryCountTestCase extends Functional
         client.dispatch("vm://in8", "test", null);
         client.dispatch("vm://in8", "test", null);
 
-        if (!latch.await(RECEIVE_TIMEOUT, TimeUnit.MILLISECONDS))
+        if (!latch.await(20000, TimeUnit.MILLISECONDS))
         {
             fail("message should have been delivered at least 8 times");
         }
