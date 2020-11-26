@@ -113,7 +113,6 @@ public abstract class AbstractForkJoinStrategyTestCase extends AbstractMuleConte
 
   @Test
   @Description("When a route timeout occurs a CompositeRoutingException is thrown with details of timeout error in RoutingResult.")
-  @FlakyTest(times = 500)
   public void timeout() throws Throwable {
     strategy = createStrategy(processingStrategy, 1, true, 50);
 
@@ -128,6 +127,7 @@ public abstract class AbstractForkJoinStrategyTestCase extends AbstractMuleConte
 
   @Test
   @Description("When a route timeout occurs all routes are still executed and  a CompositeRoutingException is thrown with details of timeout error and successful routes in RoutingResult.")
+  @FlakyTest(times = 500)
   public void timeoutDelayed() throws Throwable {
     strategy = createStrategy(processingStrategy, 1, true, 50);
 
