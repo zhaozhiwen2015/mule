@@ -267,13 +267,12 @@ public class ExtensionMessageSource extends ExtensionComponent<SourceModel> impl
     LOGGER.warn(format("Message source '%s' on flow '%s' threw exception. Attempting to reconnect...",
                        sourceAdapter.getName(), getLocation().getRootContainerName()),
                 exception);
-
+    exception.getConnection().ifPresent(sourceConnectionManager::invalidate);
     retryScheduler.execute(() -> {
       Mono<Void> reconnectionAction = sourceAdapter.getReconnectionAction(exception)
           .map(p -> from(retryPolicyTemplate.applyPolicy(p, retryScheduler)))
           .orElseGet(() -> create(sink -> {
             try {
-              exception.getConnection().ifPresent(sourceConnectionManager::invalidate);
               restart();
               sink.success();
             } catch (Exception e) {
