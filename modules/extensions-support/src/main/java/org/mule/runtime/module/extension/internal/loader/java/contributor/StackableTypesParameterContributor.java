@@ -130,7 +130,8 @@ public class StackableTypesParameterContributor implements ParameterDeclarerCont
             .setStaticResolverFactory(value -> new StaticValueResolver<>(new StaticParameterResolver<>(value)))
             .setDelegateResolverFactory(resolver -> new ParameterResolverValueResolverWrapper(resolver))
             .setExpressionBasedResolverFactory((value, expectedType,
-                                                content) -> new ExpressionBasedParameterResolverValueResolver(value, expectedType, content))
+                                                content) -> new ExpressionBasedParameterResolverValueResolver(value, expectedType,
+                                                                                                              content))
             .build())
         .addType(StackableType
             .builder(TypedValue.class)
@@ -143,7 +144,8 @@ public class StackableTypesParameterContributor implements ParameterDeclarerCont
         .addType(StackableType
             .builder(Literal.class)
             .setExpressionBasedResolverFactory((expression, expectedType, content) -> new StaticLiteralValueResolver(expression,
-                                                                                                                     expectedType.getType()))
+                                                                                                                     expectedType
+                                                                                                                         .getType()))
             .setStaticResolverFactory((value) -> new StaticLiteralValueResolver(value.toString(), value.getClass()))
             .build())
         .build();

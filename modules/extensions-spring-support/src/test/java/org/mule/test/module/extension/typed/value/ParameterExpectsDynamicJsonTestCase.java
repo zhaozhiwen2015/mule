@@ -31,11 +31,11 @@ public class ParameterExpectsDynamicJsonTestCase extends AbstractTypedValueTestC
     TypedValue<String> json = flowRunner("expectTypedValueJsonParameter").run().getMessage().getPayload();
     assertJson(json.getValue());
   }
-  
+
   private void assertJson(String json) {
     assertThat(json, equalTo("{\n" +
-            "  \"name\": \"John Doe\",\n" +
-            "  \"age\": 37\n" +
-            "}"));
+        "  \"name\": \"John Doe\",\n" +
+        "  \"age\": 37\n" +
+        "}"));
   }
 }

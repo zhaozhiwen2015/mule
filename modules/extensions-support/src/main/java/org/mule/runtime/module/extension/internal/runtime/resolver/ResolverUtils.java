@@ -220,7 +220,8 @@ public class ResolverUtils {
           valueResolver.setExtendedExpressionManager(muleContext.getExpressionManager());
           resolver = valueResolver;
         } else if (muleContext.getExpressionManager().isExpression(expression)) {
-          TypeSafeExpressionValueResolver<Object> valueResolver = new TypeSafeExpressionValueResolver<>(expression, expectedDataType);
+          TypeSafeExpressionValueResolver<Object> valueResolver =
+              new TypeSafeExpressionValueResolver<>(expression, expectedDataType);
           valueResolver.setTransformationService(muleContext.getTransformationService());
           valueResolver.setExtendedExpressionManager(muleContext.getExpressionManager());
           resolver = valueResolver;

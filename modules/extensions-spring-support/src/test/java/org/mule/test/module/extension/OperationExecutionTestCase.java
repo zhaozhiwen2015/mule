@@ -536,6 +536,7 @@ public class OperationExecutionTestCase extends AbstractExtensionFunctionalTestC
   public void anyTypeAsParameterType() throws Exception {
     TypedValue<Object> payload = flowRunner("receiveJsonInputStream").keepStreamsOpen().run().getMessage().getPayload();
     String jsonValue = IOUtils.toString((CursorStreamProvider) payload.getValue());
+    System.out.println(jsonValue);
     assertThat(jsonValue, is("{\n  \n}"));
   }
 

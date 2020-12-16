@@ -107,8 +107,8 @@ public interface ExtensionParameter extends WithType, WithAnnotations, NamedObje
 
   default MetadataType getMetadataType() {
     MetadataFormat format = getAnnotation(Expects.class)
-            .map(a -> toMetadataFormat(parse(a.mediaType())) )
-            .orElse(JAVA);
+        .map(a -> toMetadataFormat(parse(a.mediaType())))
+        .orElse(JAVA);
     return getType().asMetadataType(format);
 
   }

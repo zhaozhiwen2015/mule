@@ -112,11 +112,12 @@ public class TypedValueParameterOperations {
   }
 
   @MediaType(APPLICATION_JSON)
-  public Result<String, Void> typedValueJsonParameter(@Content @Expects(mediaType = APPLICATION_JSON) TypedValue<InputStream> typedJsonContent) {
+  public Result<String, Void> typedValueJsonParameter(@Content @Expects(
+      mediaType = APPLICATION_JSON) TypedValue<InputStream> typedJsonContent) {
     return Result.<String, Void>builder()
-            .output(toString(typedJsonContent.getValue()))
-            .mediaType(typedJsonContent.getDataType().getMediaType())
-            .build();
+        .output(toString(typedJsonContent.getValue()))
+        .mediaType(typedJsonContent.getDataType().getMediaType())
+        .build();
   }
 
   private String toString(@Expects(mediaType = APPLICATION_JSON) @Content InputStream jsonContent) {

@@ -27,6 +27,7 @@ import static org.mule.tck.util.MuleContextUtils.eventBuilder;
 import org.mule.metadata.api.model.MetadataType;
 import org.mule.metadata.java.api.JavaTypeLoader;
 import org.mule.runtime.api.component.location.ComponentLocation;
+import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.core.api.el.ExtendedExpressionManager;
 import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.runtime.core.internal.context.MuleContextWithRegistry;
@@ -124,7 +125,7 @@ public class TypeSafeExpressionValueResolverMelDefaultTestCase extends AbstractM
   public void nullExpectedType() throws Exception {
     expected.expect(IllegalArgumentException.class);
     expected.expectMessage("expected type cannot be null");
-    getResolver("#[payload]", null);
+    getResolver("#[payload]", (DataType) null);
   }
 
   private void assertResolved(Object resolvedValue, Object expected, VerificationMode expressionManagerVerificationMode) {
@@ -138,8 +139,11 @@ public class TypeSafeExpressionValueResolverMelDefaultTestCase extends AbstractM
   }
 
   private <T> ValueResolver<T> getResolver(String expression, MetadataType expectedType) throws Exception {
-    TypeSafeExpressionValueResolver<T> valueResolver = new TypeSafeExpressionValueResolver(expression,
-                                                                                           toDataType(expectedType));
+    return getResolver(expression, toDataType(expectedType));
+  }
+
+  private <T> ValueResolver<T> getResolver(String expression, DataType expectedType) throws Exception {
+    TypeSafeExpressionValueResolver<T> valueResolver = new TypeSafeExpressionValueResolver(expression, expectedType);
     muleContext.getInjector().inject(valueResolver);
     valueResolver.setExtendedExpressionManager(expressionManager);
     valueResolver.setTransformationService(muleContext.getTransformationService());
