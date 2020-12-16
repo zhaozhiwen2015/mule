@@ -59,22 +59,25 @@ public final class ExpressionAttributeEvaluatorDelegate<T> implements AttributeE
       return isStronglyTyped() ? createTypedDelegate() : createLooseDelegate();
     }
 
+    // At this point, we shold just return a typedDelegate and be happy. That breaks backwards compatibility.
+    //
+    // The following IF is a PoC for a potential WA.
+    //
+    // Without this, tests like org.mule.test.module.extension.OperationExecutionTestCase.anyTypeAsParameterType in which
+    // the value is a String/InputStream which content is a text document (json, xml, etc) but the mime type is still set to java
+    // would break. e.g: InputStream with application/java mimeType gets re-written by DW with application/json mimeType. For DW,
+    // the value itself is a String, so it adds quotes and escaping around it, effectively breaking it.
+    //
+    // This experimental code toys with the idea of evaluating the expression in a loosely-typed way, taking the result at face
+    // value if a String or InputStream, and only requesting DW to rewrite if the mimeType doesn't match.
+    //
+    // This works in most cases without breaking backwards compatibility, the problem is that it only adds value when the expression
+    // returns a map or pojo. If the expression returns a stream holding an XML when a JSON was requested, the connector is still
+    // not getting the format that it needs. So it only half-fixes the problem, adding risk of backwards compatibility issues in the process.
+    // For this approach to makes sense, we also need to drop the idea of @Expects(mediaType = "bleh") and instead have more constrained
+    // semantics like @ExpectsJson, @ExpecsXML and @ExpectsCSV.
     Class<?> expectedClass = expectedDataType.getType();
     if (InputStream.class.isAssignableFrom(expectedClass) || String.class.equals(expectedClass)) {
-      // This is a PoC for a potential WA for a backwards compatibility issue.
-      // Without this, tests like org.mule.test.module.extension.OperationExecutionTestCase.anyTypeAsParameterType in which
-      // the value is a String/InputStream which content is a text document (json, xml, etc) but the mime type is still set to java
-      // would break. e.g: InputStream with application/java mimeType gets re-written by DW with application/json mimeType. For DW,
-      // the value itself is a String, so it adds quotes and escaping around it, effectively breaking it.
-      //
-      // This experimental code toys with the idea of evaluating the expression in a loosely-typed way, taking the result at face
-      // value if a String or InputStream, and only requesting DW to rewrite if the mimeType doesn't match.
-      //
-      // This works in most cases without breaking backwards compatibility, the problem is that it only adds value when the expression
-      // returns a map or pojo. If the expression returns a stream holding an XML when a JSON was requested, the connector is still
-      // not getting the format that it needs. So it only half-fixes the problem, adding risk of backwards compatibility issues in the process.
-      // For this approach to makes sense, we also need to drop the idea of @Expects(mediaType = "bleh") and instead have more constrained
-      // semantics like @ExpectsJson, @ExpecsXML and @ExpectsCSV.
       return session -> {
         TypedValue<T> typedValue = createLooseDelegate().apply(session);
         Object value = typedValue.getValue();
@@ -88,7 +91,7 @@ public final class ExpressionAttributeEvaluatorDelegate<T> implements AttributeE
       };
     }
 
-    return createLooseDelegate();
+    return createTypedDelegate();
   }
 
   @Override
