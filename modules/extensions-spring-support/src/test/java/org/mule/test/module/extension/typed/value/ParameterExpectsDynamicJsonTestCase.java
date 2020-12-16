@@ -17,12 +17,12 @@ public class ParameterExpectsDynamicJsonTestCase extends AbstractTypedValueTestC
 
   @Override
   protected String getConfigFile() {
-    return "expects-dynamic-json-config.xml";
+    return "expects-json-parameter-config.xml";
   }
 
   @Test
   public void expectsJsonParameter() throws Exception {
-    String json = (String) flowRunner("typedValueForObject").run().getMessage().getPayload().getValue();
+    String json = (String) flowRunner("expectJsonParameter").run().getMessage().getPayload().getValue();
     assertJson(json);
   }
 
