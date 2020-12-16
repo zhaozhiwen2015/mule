@@ -7,7 +7,13 @@
 package org.mule.runtime.module.extension.api.loader.java.type;
 
 
+import static org.mule.metadata.api.model.MetadataFormat.JAVA;
+import static org.mule.runtime.api.metadata.MediaType.parse;
+import static org.mule.runtime.extension.api.util.ExtensionMetadataTypeUtils.toMetadataFormat;
+
 import org.mule.api.annotation.NoImplement;
+import org.mule.metadata.api.model.MetadataFormat;
+import org.mule.metadata.api.model.MetadataType;
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.message.Error;
 import org.mule.runtime.api.meta.NamedObject;
@@ -31,6 +37,7 @@ import org.mule.runtime.extension.api.runtime.source.SourceCompletionCallback;
 import org.mule.runtime.extension.api.runtime.source.SourceResult;
 import org.mule.runtime.extension.api.runtime.streaming.StreamingHelper;
 import org.mule.runtime.extension.api.security.AuthenticationHandler;
+import org.mule.sdk.api.annotation.param.Expects;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.Set;
@@ -96,6 +103,14 @@ public interface ExtensionParameter extends WithType, WithAnnotations, NamedObje
       }
     }
     return optionalDefaultValue;
+  }
+
+  default MetadataType getMetadataType() {
+    MetadataFormat format = getAnnotation(Expects.class)
+            .map(a -> toMetadataFormat(parse(a.mediaType())) )
+            .orElse(JAVA);
+    return getType().asMetadataType(format);
+
   }
 
   /**

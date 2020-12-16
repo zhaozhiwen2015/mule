@@ -6,10 +6,9 @@
  */
 package org.mule.runtime.module.extension.internal.loader.java.type.runtime;
 
-import static org.mule.metadata.api.model.MetadataFormat.JAVA;
-
 import org.mule.metadata.api.ClassTypeLoader;
 import org.mule.metadata.api.builder.BaseTypeBuilder;
+import org.mule.metadata.api.model.MetadataFormat;
 import org.mule.metadata.api.model.MetadataType;
 import org.mule.runtime.module.extension.internal.loader.enricher.MetadataTypeEnricher;
 
@@ -35,8 +34,8 @@ public class ParameterTypeWrapper extends TypeWrapper {
   }
 
   @Override
-  public MetadataType asMetadataType() {
-    MetadataType metadataType = typeLoader.load(type);
+  public MetadataType asMetadataType(MetadataFormat format) {
+    MetadataType metadataType = typeLoader.load(type, format);
 
     if (this.isSameType(Object.class) ||
         this.isSameType(Serializable.class) ||
@@ -45,7 +44,7 @@ public class ParameterTypeWrapper extends TypeWrapper {
         this.isAssignableTo(byte[].class)) {
 
       MetadataTypeEnricher enricher = new MetadataTypeEnricher();
-      return enricher.enrich(BaseTypeBuilder.create(JAVA).anyType().build(), typeLoader.load(type).getAnnotations());
+      return enricher.enrich(BaseTypeBuilder.create(format).anyType().build(), metadataType.getAnnotations());
     }
 
     return metadataType;

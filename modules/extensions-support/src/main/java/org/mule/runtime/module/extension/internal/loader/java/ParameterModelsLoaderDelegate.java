@@ -132,7 +132,7 @@ public final class ParameterModelsLoaderDelegate {
             .defaultingTo(extensionParameter.defaultValue().isPresent() ? extensionParameter.defaultValue().get() : null);
       }
 
-      final MetadataType metadataType = extensionParameter.getType().asMetadataType();
+      MetadataType metadataType = extensionParameter.getMetadataType();
       parameter.ofType(metadataType).describedAs(extensionParameter.getDescription());
       metadataType.getAnnotation(StereotypeTypeAnnotation.class).ifPresent(st -> {
         parameter.withAllowedStereotypes(st.getAllowedStereotypes());

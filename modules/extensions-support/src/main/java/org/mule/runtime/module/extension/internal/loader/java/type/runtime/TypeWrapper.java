@@ -11,12 +11,14 @@ import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
+import static org.mule.metadata.api.model.MetadataFormat.JAVA;
 import static org.mule.runtime.module.extension.api.loader.java.type.PropertyElement.Accessibility.READ_ONLY;
 import static org.mule.runtime.module.extension.api.loader.java.type.PropertyElement.Accessibility.READ_WRITE;
 import static org.mule.runtime.module.extension.api.loader.java.type.PropertyElement.Accessibility.WRITE_ONLY;
 import static org.mule.runtime.module.extension.internal.util.IntrospectionUtils.getPropertyDescriptors;
 
 import org.mule.metadata.api.ClassTypeLoader;
+import org.mule.metadata.api.model.MetadataFormat;
 import org.mule.metadata.api.model.MetadataType;
 import org.mule.metadata.java.api.annotation.ClassInformationAnnotation;
 import org.mule.runtime.api.util.LazyValue;
@@ -232,7 +234,12 @@ public class TypeWrapper implements Type {
 
   @Override
   public MetadataType asMetadataType() {
-    return typeLoader.load(type);
+    return asMetadataType(JAVA);
+  }
+
+  @Override
+  public MetadataType asMetadataType(MetadataFormat format) {
+    return typeLoader.load(type, format);
   }
 
   /**

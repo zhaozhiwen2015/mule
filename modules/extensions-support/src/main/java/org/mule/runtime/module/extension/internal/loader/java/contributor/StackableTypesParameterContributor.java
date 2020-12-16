@@ -10,6 +10,7 @@ import static java.lang.String.format;
 import static org.mule.runtime.api.metadata.DataType.fromType;
 
 import org.mule.metadata.api.ClassTypeLoader;
+import org.mule.metadata.api.model.MetadataType;
 import org.mule.runtime.api.meta.model.declaration.fluent.ParameterDeclarer;
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.api.metadata.TypedValue;
@@ -64,8 +65,12 @@ public class StackableTypesParameterContributor implements ParameterDeclarerCont
     LazyValue<StackedTypesModelProperty.Builder> stackedTypesModelPropertyBuilder =
         new LazyValue<>(StackedTypesModelProperty::builder);
 
+    final MetadataType parameterType = declarer.getDeclaration().getType();
+    final boolean isDynamicType = declarer.getDeclaration().hasDynamicType();
+
     doContribute(parameter, declarationContext, parameter.getType(), stackedTypesModelPropertyBuilder);
-    declarer.ofType(parameter.getType().asMetadataType());
+
+    declarer.getDeclaration().setType(parameterType, isDynamicType);
     stackedTypesModelPropertyBuilder.ifComputed(builder -> declarer.withModelProperty(builder.build()));
   }
 

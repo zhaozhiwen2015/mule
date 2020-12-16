@@ -43,6 +43,7 @@ import org.mule.metadata.api.ClassTypeLoader;
 import org.mule.metadata.api.builder.BaseTypeBuilder;
 import org.mule.metadata.api.model.AnyType;
 import org.mule.metadata.api.model.ArrayType;
+import org.mule.metadata.api.model.MetadataFormat;
 import org.mule.metadata.api.model.MetadataType;
 import org.mule.metadata.api.model.ObjectFieldType;
 import org.mule.metadata.api.model.ObjectType;
@@ -74,6 +75,7 @@ import org.mule.runtime.api.meta.model.parameter.ParameterModel;
 import org.mule.runtime.api.meta.model.parameter.ParameterizedModel;
 import org.mule.runtime.api.meta.model.util.ExtensionWalker;
 import org.mule.runtime.api.metadata.DataType;
+import org.mule.runtime.api.metadata.DataTypeParamsBuilder;
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.api.streaming.CursorProvider;
 import org.mule.runtime.api.streaming.bytes.CursorStreamProvider;
@@ -239,7 +241,15 @@ public final class IntrospectionUtils {
 
       @Override
       protected void defaultVisit(MetadataType metadataType) {
-        dataType.set(DataType.fromType(type));
+        DataTypeParamsBuilder dataTypeBuilder = DataType.builder().type(type);
+        MetadataFormat metadataFormat = metadataType.getMetadataFormat();
+        if (metadataFormat != JAVA) {
+          Collection<String> mediaTypes = metadataFormat.getValidMimeTypes();
+          if (mediaTypes.size() > 0) {
+            dataTypeBuilder.mediaType(mediaTypes.iterator().next());
+          }
+        }
+        dataType.set(dataTypeBuilder.build());
       }
 
       @Override

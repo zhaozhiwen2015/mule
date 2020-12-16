@@ -11,9 +11,11 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.mule.runtime.module.extension.internal.util.IntrospectionUtils.getApiMethods;
 import org.mule.metadata.api.ClassTypeLoader;
+import org.mule.metadata.api.model.MetadataFormat;
 import org.mule.metadata.api.model.MetadataType;
 import org.mule.runtime.api.meta.Category;
 import org.mule.runtime.api.util.LazyValue;
+import org.mule.runtime.api.util.Pair;
 import org.mule.runtime.extension.api.annotation.Configurations;
 import org.mule.runtime.extension.api.annotation.ExpressionFunctions;
 import org.mule.runtime.extension.api.annotation.Extension;
@@ -108,6 +110,7 @@ public class ExtensionTypeWrapper<T> extends ComponentWrapper implements Extensi
 
     private Map<Type, MetadataType> typeMetadataTypeMap = new WeakHashMap<>();
     private Map<String, Optional<MetadataType>> typeIdentifierMetadataTypeMap = new WeakHashMap<>();
+    private Map<Pair<Type, MetadataFormat>, MetadataType> formattedTypeMap = new WeakHashMap<>();
 
     public CachedClassTypeLoader(ClassTypeLoader classTypeLoader) {
       requireNonNull(classTypeLoader, "classTypeLoader cannot be null");
@@ -118,6 +121,11 @@ public class ExtensionTypeWrapper<T> extends ComponentWrapper implements Extensi
     @Override
     public MetadataType load(Type type) {
       return typeMetadataTypeMap.computeIfAbsent(type, k -> classTypeLoader.load(type));
+    }
+
+    @Override
+    public MetadataType load(Type type, MetadataFormat format) {
+      return formattedTypeMap.computeIfAbsent(new Pair<>(type, format), k -> classTypeLoader.load(type, format));
     }
 
     @Override

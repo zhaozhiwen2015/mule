@@ -8,6 +8,7 @@ package org.mule.runtime.module.extension.api.loader.java.type;
 
 import org.mule.api.annotation.NoImplement;
 import org.mule.metadata.api.model.AnyType;
+import org.mule.metadata.api.model.MetadataFormat;
 import org.mule.metadata.api.model.MetadataType;
 import org.mule.metadata.java.api.annotation.ClassInformationAnnotation;
 
@@ -131,6 +132,10 @@ public interface Type extends WithAnnotations, WithName, WithAlias, WithDeclarin
    * @since 4.1
    */
   MetadataType asMetadataType();
+
+  default MetadataType asMetadataType(MetadataFormat format) {
+    return asMetadataType();
+  }
 
   String getTypeName();
 
