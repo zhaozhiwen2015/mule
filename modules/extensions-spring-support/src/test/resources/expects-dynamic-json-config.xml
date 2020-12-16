@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:typed-value="http://www.mulesoft.org/schema/mule/typed-value"
+      xmlns:heisenberg="http://www.mulesoft.org/schema/mule/heisenberg"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+               http://www.mulesoft.org/schema/mule/typed-value http://www.mulesoft.org/schema/mule/typed-value/current/mule-typed-value.xsd
+               http://www.mulesoft.org/schema/mule/heisenberg http://www.mulesoft.org/schema/mule/heisenberg/current/mule-heisenberg.xsd">
+
+
+    <typed-value:config name="config"/>
+
+    <flow name="typedValueForObject">
+        <typed-value:dynamic-json-parameter>
+            <typed-value:json-content>
+                #[{name: "John Doe", age: 37}]
+            </typed-value:json-content>
+        </typed-value:dynamic-json-parameter>
+    </flow>
+
+
+</mule>
