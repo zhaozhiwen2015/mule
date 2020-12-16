@@ -76,6 +76,9 @@ public final class ExpressionAttributeEvaluatorDelegate<T> implements AttributeE
     // not getting the format that it needs. So it only half-fixes the problem, adding risk of backwards compatibility issues in the process.
     // For this approach to makes sense, we also need to drop the idea of @Expects(mediaType = "bleh") and instead have more constrained
     // semantics like @ExpectsJson, @ExpecsXML and @ExpectsCSV.
+
+    // If this hack were to ever be productized, then the ExpressionLanguage needs to be injected so that the mediaType conversion
+    // is not done by creating a new typed delegate which evaluates the entire thing again. This code is just exploratory.
     Class<?> expectedClass = expectedDataType.getType();
     if (InputStream.class.isAssignableFrom(expectedClass) || String.class.equals(expectedClass)) {
       return session -> {
