@@ -47,19 +47,16 @@ public class ExpressionBasedParameterResolverValueResolver<T> implements Express
   @Inject
   private Registry registry;
 
-  private Class<T> type;
   private boolean melDefault;
   private boolean melAvailable;
   private TypeSafeExpressionValueResolver<T> delegateResolver;
 
-  public ExpressionBasedParameterResolverValueResolver(String expression, Class<T> type, DataType expectedDataType) {
-    this(expression, type, expectedDataType, false);
+  public ExpressionBasedParameterResolverValueResolver(String expression, DataType expectedDataType) {
+    this(expression, expectedDataType, false);
   }
 
-  public ExpressionBasedParameterResolverValueResolver(String expression, Class<T> type, DataType expectedDataType,
-                                                       boolean content) {
+  public ExpressionBasedParameterResolverValueResolver(String expression, DataType expectedDataType, boolean content) {
     this.expression = expression;
-    this.type = type;
     this.expectedDataType = expectedDataType;
     this.content = content;
   }
@@ -69,7 +66,7 @@ public class ExpressionBasedParameterResolverValueResolver<T> implements Express
     melDefault = valueOf(getProperty(MULE_MEL_AS_DEFAULT, "false"));
     melAvailable = registry.lookupByName(COMPATIBILITY_PLUGIN_INSTALLED).isPresent();
 
-    delegateResolver = new TypeSafeExpressionValueResolver<>(expression, type, expectedDataType);
+    delegateResolver = new TypeSafeExpressionValueResolver<>(expression, expectedDataType);
     delegateResolver.setExtendedExpressionManager(extendedExpressionManager);
     delegateResolver.setTransformationService(transformationService);
     delegateResolver.setMuleContext(muleContext);

@@ -28,34 +28,37 @@ import javax.inject.Inject;
  */
 public class ExpressionTypedValueValueResolver<T> extends ExpressionValueResolver<TypedValue<T>> implements Initialisable {
 
-  private final Class<T> expectedClass;
+  private final DataType expectedType;
   private final boolean content;
+  private final Class<T> expectedClass;
   private TypeSafeTransformer typeSafeTransformer;
 
   @Inject
   private TransformationService transformationService;
 
-  public ExpressionTypedValueValueResolver(String expression, Class<T> expectedClass) {
-    this(expression, expectedClass, false);
+  public ExpressionTypedValueValueResolver(String expression, DataType expectedType) {
+    this(expression, expectedType, false);
   }
 
-  public ExpressionTypedValueValueResolver(String expression, Class<T> expectedClass, boolean content) {
-    super(expression, DataType.fromType(expectedClass));
-    this.expectedClass = expectedClass;
+  public ExpressionTypedValueValueResolver(String expression, DataType expectedType, boolean content) {
+    super(expression, expectedType);
+    this.expectedType = expectedType;
+    expectedClass = (Class<T>) expectedType.getType();
     this.content = content;
   }
 
   @Override
   public TypedValue<T> resolve(ValueResolvingContext context) throws MuleException {
     TypedValue<T> typedValue = resolveTypedValue(context);
-    if (!isInstance(expectedClass, typedValue.getValue())) {
-      DataType expectedDataType =
+    T value = typedValue.getValue();
+    if (!isInstance(expectedClass, value)) {
+      DataType dataType = typedValue.getDataType();
+      DataType requestedDataType =
           DataType.builder()
               .type(expectedClass)
-              .mediaType(typedValue.getDataType().getMediaType())
+              .mediaType(dataType.getMediaType())
               .build();
-      return new TypedValue<>(typeSafeTransformer.<T>transform(typedValue.getValue(), typedValue.getDataType(), expectedDataType),
-                              expectedDataType);
+      return new TypedValue<>(typeSafeTransformer.transform(value, dataType, requestedDataType), requestedDataType);
     }
     return typedValue;
   }

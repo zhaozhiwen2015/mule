@@ -6,6 +6,11 @@
  */
 package org.mule.test.module.extension.typed.value;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+
+import org.mule.runtime.api.metadata.TypedValue;
+
 import org.junit.Test;
 
 public class ParameterExpectsDynamicJsonTestCase extends AbstractTypedValueTestCase {
@@ -16,8 +21,21 @@ public class ParameterExpectsDynamicJsonTestCase extends AbstractTypedValueTestC
   }
 
   @Test
-  public void expectsDynamicJson() throws Exception {
+  public void expectsJsonParameter() throws Exception {
     String json = (String) flowRunner("typedValueForObject").run().getMessage().getPayload().getValue();
-    System.out.println(json);
+    assertJson(json);
+  }
+
+  @Test
+  public void expectsJsonParameterInTypedValue() throws Exception {
+    TypedValue<String> json = flowRunner("expectTypedValueJsonParameter").run().getMessage().getPayload();
+    assertJson(json.getValue());
+  }
+  
+  private void assertJson(String json) {
+    assertThat(json, equalTo("{\n" +
+            "  \"name\": \"John Doe\",\n" +
+            "  \"age\": 37\n" +
+            "}"));
   }
 }

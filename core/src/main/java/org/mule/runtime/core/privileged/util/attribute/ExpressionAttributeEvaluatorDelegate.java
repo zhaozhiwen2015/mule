@@ -36,7 +36,7 @@ import java.util.function.Function;
  */
 public final class ExpressionAttributeEvaluatorDelegate<T> implements AttributeEvaluatorDelegate<T> {
 
-  private static final Set<Class<?>> BLACK_LIST_TYPES =
+  private static final Set<Class<?>> LOOSE_TYPES =
       new HashSet<>(asList(Object.class, InputStream.class, Iterator.class, Serializable.class));
 
   private final CompiledExpression expression;
@@ -46,20 +46,25 @@ public final class ExpressionAttributeEvaluatorDelegate<T> implements AttributeE
   public ExpressionAttributeEvaluatorDelegate(CompiledExpression expression, DataType expectedDataType) {
     this.expression = expression;
     this.expectedDataType = expectedDataType;
-
+    delegate = createDelegate();
   }
 
   private Function<ExpressionManagerSession, TypedValue<T>> createDelegate() {
     if (expectedDataType == null) {
-      return createUnboundedDelegate();
+      return createLooseDelegate();
     }
 
     MediaType expectedMediaType = expectedDataType.getMediaType();
     if (expectedMediaType.matches(ANY) || expectedMediaType.matches(APPLICATION_JAVA)) {
-      return hasExpectedDataType() ? createBoundedDelegate() : createUnboundedDelegate();
+      return isStronglyTyped() ? createTypedDelegate() : createLooseDelegate();
     }
 
-    return 
+    Class<?> expectedClass = expectedDataType.getType();
+    if (InputStream.class.isAssignableFrom(expectedClass) || String.class.equals(expectedClass)) {
+      return createTypedDelegate();
+    }
+
+    return createLooseDelegate();
   }
 
   @Override
@@ -83,21 +88,18 @@ public final class ExpressionAttributeEvaluatorDelegate<T> implements AttributeE
   }
 
   private TypedValue<T> resolveExpressionWithSession(ExpressionManagerSession session) {
-    if (hasExpectedDataType()) {
-      return
-    } else {
-      return (TypedValue<T>) session.evaluate(expression);
-    }
+    return delegate.apply(session);
   }
 
-  private Function<ExpressionManagerSession, TypedValue<T>>  createBoundedDelegate() {
+  private Function<ExpressionManagerSession, TypedValue<T>> createTypedDelegate() {
     return session -> (TypedValue<T>) session.evaluate(expression, expectedDataType);
   }
-  private Function<ExpressionManagerSession, TypedValue<T>> createUnboundedDelegate() {
+
+  private Function<ExpressionManagerSession, TypedValue<T>> createLooseDelegate() {
     return session -> (TypedValue<T>) session.evaluate(expression);
   }
 
-  private boolean hasExpectedDataType() {
-    return expectedDataType != null && !BLACK_LIST_TYPES.contains(expectedDataType.getType());
+  private boolean isStronglyTyped() {
+    return expectedDataType != null && !LOOSE_TYPES.contains(expectedDataType.getType());
   }
 }

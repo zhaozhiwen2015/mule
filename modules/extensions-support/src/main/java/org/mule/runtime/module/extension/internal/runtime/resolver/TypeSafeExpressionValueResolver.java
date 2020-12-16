@@ -56,14 +56,14 @@ public class TypeSafeExpressionValueResolver<T> implements ValueResolver<T>, Ini
   private Boolean melDefault;
   private Boolean melAvailable;
 
-  public TypeSafeExpressionValueResolver(String expression, Class<T> expectedType, DataType expectedDataType) {
-    this(expression, expectedType, expectedDataType, false);
+  public TypeSafeExpressionValueResolver(String expression, DataType expectedDataType) {
+    this(expression, expectedDataType, false);
   }
 
-  public TypeSafeExpressionValueResolver(String expression, Class<T> expectedType, DataType expectedDataType, boolean content) {
-    checkArgument(expectedType != null, "expected type cannot be null");
+  public TypeSafeExpressionValueResolver(String expression, DataType expectedDataType, boolean content) {
+    checkArgument(expectedDataType != null, "expected type cannot be null");
     this.expression = expression;
-    this.expectedType = expectedType;
+    this.expectedType = (Class<T>) expectedDataType.getType();
     this.expectedDataType = expectedDataType;
     this.content = content;
   }

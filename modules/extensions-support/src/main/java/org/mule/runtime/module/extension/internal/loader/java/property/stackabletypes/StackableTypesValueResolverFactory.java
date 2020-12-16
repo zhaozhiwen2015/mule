@@ -11,6 +11,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.mule.runtime.api.util.Preconditions.checkArgument;
 
+import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.module.extension.internal.runtime.resolver.ValueResolver;
 
 import java.util.Optional;
@@ -43,11 +44,11 @@ public class StackableTypesValueResolverFactory {
    * @param expectedType The expected type of the expression resolution
    * @return The expression based {@link ValueResolver}
    */
-  public ValueResolver getExpressionBasedValueResolver(String expression, Class expectedType) {
+  public ValueResolver getExpressionBasedValueResolver(String expression, DataType expectedType) {
     return getExpressionBasedValueResolver(expression, expectedType, false);
   }
 
-  public ValueResolver getExpressionBasedValueResolver(String expression, Class expectedType, boolean content) {
+  public ValueResolver getExpressionBasedValueResolver(String expression, DataType expectedType, boolean content) {
     Stack<StackableType> stackableTypes = types.get();
     StackableType stackableType = stackableTypes.pop();
     StackableType.ExpressionBasedResolverFactory resolverFactory = stackableType

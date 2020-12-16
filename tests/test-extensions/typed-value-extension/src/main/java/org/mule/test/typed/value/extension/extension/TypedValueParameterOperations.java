@@ -8,20 +8,20 @@
 package org.mule.test.typed.value.extension.extension;
 
 import static org.mule.runtime.api.util.IOUtils.toByteArray;
+import static org.mule.runtime.extension.api.annotation.param.MediaType.APPLICATION_JSON;
 import static org.mule.runtime.extension.api.annotation.param.MediaType.TEXT_PLAIN;
 
 import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.extension.api.annotation.metadata.OutputResolver;
-import org.mule.runtime.extension.api.annotation.metadata.TypeResolver;
 import org.mule.runtime.extension.api.annotation.param.Config;
 import org.mule.runtime.extension.api.annotation.param.Content;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
+import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.mule.sdk.api.annotation.param.Expects;
 import org.mule.test.heisenberg.extension.model.DifferedKnockableDoor;
 import org.mule.test.heisenberg.extension.model.KnockeableDoor;
-import org.mule.test.typed.value.extension.extension.datasense.JsonInputTypeResolver;
 import org.mule.test.vegan.extension.VeganProductInformation;
 
 import java.io.InputStream;
@@ -105,8 +105,21 @@ public class TypedValueParameterOperations {
 
   }
 
-  @MediaType(MediaType.APPLICATION_JSON)
-  public String dynamicJsonParameter(@Content @Expects(mediaType = Expects.APPLICATION_JSON) @TypeResolver(JsonInputTypeResolver.class) InputStream jsonContent) {
+
+  @MediaType(APPLICATION_JSON)
+  public String jsonParameter(@Content @Expects(mediaType = APPLICATION_JSON) InputStream jsonContent) {
+    return TypedValueParameterOperations.this.toString(jsonContent);
+  }
+
+  @MediaType(APPLICATION_JSON)
+  public Result<String, Void> typedValueJsonParameter(@Content @Expects(mediaType = APPLICATION_JSON) TypedValue<InputStream> typedJsonContent) {
+    return Result.<String, Void>builder()
+            .output(toString(typedJsonContent.getValue()))
+            .mediaType(typedJsonContent.getDataType().getMediaType())
+            .build();
+  }
+
+  private String toString(@Expects(mediaType = APPLICATION_JSON) @Content InputStream jsonContent) {
     return new String(toByteArray(jsonContent));
   }
 }

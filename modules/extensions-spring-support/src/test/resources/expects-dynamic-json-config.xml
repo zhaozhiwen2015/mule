@@ -10,12 +10,20 @@
 
     <typed-value:config name="config"/>
 
-    <flow name="typedValueForObject">
-        <typed-value:dynamic-json-parameter>
+    <flow name="expectJsonParameter">
+        <typed-value:json-parameter>
             <typed-value:json-content>
                 #[{name: "John Doe", age: 37}]
             </typed-value:json-content>
-        </typed-value:dynamic-json-parameter>
+        </typed-value:json-parameter>
+    </flow>
+
+    <flow name="expectTypedValueJsonParameter">
+        <typed-value:typed-value-json-parameter>
+            <typed-value:typed-json-content>
+                #[{name: "John Doe", age: 37}]
+            </typed-value:typed-json-content>
+        </typed-value:typed-value-json-parameter>
     </flow>
 
 

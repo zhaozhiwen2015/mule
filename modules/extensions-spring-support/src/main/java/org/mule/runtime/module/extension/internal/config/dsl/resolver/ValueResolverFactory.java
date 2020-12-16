@@ -20,6 +20,7 @@ import static org.mule.runtime.module.extension.internal.util.MuleExtensionUtils
 import org.mule.metadata.api.model.MetadataType;
 import org.mule.runtime.api.meta.ExpressionSupport;
 import org.mule.runtime.api.meta.model.ModelProperty;
+import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.extension.api.dsl.syntax.resolver.DslSyntaxResolver;
 import org.mule.runtime.extension.api.runtime.parameter.Literal;
 import org.mule.runtime.extension.api.util.ExtensionMetadataTypeUtils;
@@ -111,18 +112,21 @@ public class ValueResolverFactory {
                                                         Set<ModelProperty> modelProperties, Class<?> expectedClass) {
     ValueResolver resolver;
     Optional<StackedTypesModelProperty> stackedTypesModelProperty = getStackedTypesModelProperty(modelProperties);
+      DataType expectedDataType = toDataType(expectedType);
     if (stackedTypesModelProperty.isPresent()) {
-      resolver = stackedTypesModelProperty.get().getValueResolverFactory().getExpressionBasedValueResolver(value, expectedClass,
+      resolver = stackedTypesModelProperty.get().getValueResolverFactory().getExpressionBasedValueResolver(value, expectedDataType,
                                                                                                            content);
       //TODO MULE-13518: Add support for stacked value resolvers for @Parameter inside pojos // The following "IFs" should be removed once implemented
-    } else if (isParameterResolver(expectedType)) {
-      resolver = new ExpressionBasedParameterResolverValueResolver<>(value, expectedClass, toDataType(expectedType), content);
-    } else if (isTypedValue(expectedType)) {
-      resolver = new ExpressionTypedValueValueResolver<>(value, expectedClass, content);
-    } else if (isLiteral(expectedType) || isTargetParameter(modelProperties)) {
-      resolver = new StaticLiteralValueResolver<>(value, expectedClass);
     } else {
-      resolver = new TypeSafeExpressionValueResolver<>(value, expectedClass, toDataType(expectedType), content);
+      if (isParameterResolver(expectedType)) {
+        resolver = new ExpressionBasedParameterResolverValueResolver<>(value, expectedDataType, content);
+      } else if (isTypedValue(expectedType)) {
+        resolver = new ExpressionTypedValueValueResolver<>(value, expectedDataType, content);
+      } else if (isLiteral(expectedType) || isTargetParameter(modelProperties)) {
+        resolver = new StaticLiteralValueResolver<>(value, expectedClass);
+      } else {
+        resolver = new TypeSafeExpressionValueResolver<>(value, expectedDataType, content);
+      }
     }
     return resolver;
   }

@@ -9,6 +9,7 @@ package org.mule.runtime.module.extension.internal.loader.java.property.stackabl
 import static java.util.Optional.ofNullable;
 
 import org.mule.metadata.java.api.JavaTypeLoader;
+import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.module.extension.api.loader.java.type.Type;
 import org.mule.runtime.module.extension.internal.loader.java.type.runtime.TypeWrapper;
 import org.mule.runtime.module.extension.internal.runtime.resolver.ValueResolver;
@@ -126,7 +127,7 @@ public class StackableType {
   @FunctionalInterface
   public interface ExpressionBasedResolverFactory<T> {
 
-    ValueResolver<T> getResolver(String value, Class<T> expectedType, boolean content);
+    ValueResolver<T> getResolver(String value, DataType expectedType, boolean content);
   }
 
   /**

@@ -117,9 +117,8 @@ public class ValueResolverFactoryTypeVisitor extends BasicTypeValueResolverFacto
   }
 
   private ValueResolver parseDate(Object value, MetadataType dateType, Object defaultValue) {
-    Class<?> type = getType(dateType);
     if (isExpression(value)) {
-      return new TypeSafeExpressionValueResolver<>((String) value, type, toDataType(dateType));
+      return new TypeSafeExpressionValueResolver<>((String) value, toDataType(dateType));
     }
 
     if (value == null) {
@@ -130,7 +129,7 @@ public class ValueResolverFactoryTypeVisitor extends BasicTypeValueResolverFacto
       value = defaultValue;
     }
 
-    return doParseDate(value, type);
+    return doParseDate(value, getType(dateType));
   }
 
   private ValueResolver doParseDate(Object value, Class<?> type) {

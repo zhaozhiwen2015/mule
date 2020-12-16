@@ -7,7 +7,6 @@
 package org.mule.runtime.module.extension.internal.loader.java.contributor;
 
 import static java.lang.String.format;
-import static org.mule.runtime.api.metadata.DataType.fromType;
 
 import org.mule.metadata.api.ClassTypeLoader;
 import org.mule.metadata.api.model.MetadataType;
@@ -131,9 +130,7 @@ public class StackableTypesParameterContributor implements ParameterDeclarerCont
             .setStaticResolverFactory(value -> new StaticValueResolver<>(new StaticParameterResolver<>(value)))
             .setDelegateResolverFactory(resolver -> new ParameterResolverValueResolverWrapper(resolver))
             .setExpressionBasedResolverFactory((value, expectedType,
-                                                content) -> new ExpressionBasedParameterResolverValueResolver(value, expectedType,
-                                                                                                              fromType(expectedType),
-                                                                                                              content))
+                                                content) -> new ExpressionBasedParameterResolverValueResolver(value, expectedType, content))
             .build())
         .addType(StackableType
             .builder(TypedValue.class)
@@ -146,7 +143,7 @@ public class StackableTypesParameterContributor implements ParameterDeclarerCont
         .addType(StackableType
             .builder(Literal.class)
             .setExpressionBasedResolverFactory((expression, expectedType, content) -> new StaticLiteralValueResolver(expression,
-                                                                                                                     expectedType))
+                                                                                                                     expectedType.getType()))
             .setStaticResolverFactory((value) -> new StaticLiteralValueResolver(value.toString(), value.getClass()))
             .build())
         .build();
