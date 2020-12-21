@@ -140,8 +140,8 @@ public final class SourceConfigurer {
         } else {
           context = ValueResolvingContext.builder(initialiserEvent, expressionManager).build();
           SchedulingStrategy scheduler = (SchedulingStrategy) valueResolver.resolve(context);
-            sdkSource = new PollingSourceWrapper<>((PollingSource) configuredSource, scheduler,
-                                                        resolverMaxItemsPerPoll(resolverSet, context, initialiserEvent));
+          sdkSource = new PollingSourceWrapper<>((PollingSource) sdkSource, scheduler,
+                                                 resolverMaxItemsPerPoll(resolverSet, context, initialiserEvent));
         }
       }
 
